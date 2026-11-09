@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>公文排版助手 · 华炬 Skill 集市</title>
+<meta name="description" content="一键统一标点、字体、段落和页码，按公文和法律文书格式出稿。基于开源项目 document-format-skills。">
+<meta property="og:title" content="公文排版助手 · 华炬 Skill 集市">
+<meta property="og:description" content="一键统一标点、字体、段落和页码，按公文和法律文书格式出稿。基于开源项目 document-format-skills。">
+<link rel="icon" type="image/png" href="../img/mark.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Noto+Sans+SC:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/site.css">
+</head>
+<body>
+<a class="skip button-sm" href="#main">跳到正文</a>
+<nav class="nav" aria-label="主导航">
+  <a class="brand title-3" href="../index.html" aria-label="华炬 Skill 集市 首页"><img src="../img/mark.png" width="28" height="28" alt="">华炬 Skill 集市</a>
+  <div class="nav-links title-4">
+    <a class="on" href="../index.html#skills">首期上架</a>
+    <a href="../index.html#how">怎么玩</a>
+    <a href="../index.html#faq">常见问题</a>
+  </div>
+  <a class="btn button-sm" href="../index.html#join">报名下期摊位</a>
+</nav>
+<main id="main">
+<div class="wrap detail-hero">
+  <a class="crumb title-4" href="../index.html#skills"><svg width="16" height="16" viewBox="0 0 256 256" aria-hidden="true"><path d="M224 128a8 8 0 0 1-8 8H59.3l58.4 58.3a8 8 0 0 1-11.4 11.4l-72-72a8 8 0 0 1 0-11.4l72-72a8 8 0 0 1 11.4 11.4L59.3 120H216a8 8 0 0 1 8 8z" fill="currentColor"/></svg>返回首期上架</a>
+  <h1 class="heading-3">格式不用手调，<br>一键排成公文和法律文书</h1>
+  <p class="lead body-3 muted">调标点、字体、段落和页码最费时间，还容易漏。这个技能按 GB/T 9704 公文格式标准自动处理 Word 文档，网页和 AI 助手里都能用。</p>
+  <div class="facts"><div class="fact"><p class="caption-5 quiet">分享人</p><p class="title-3">韩宇</p></div><div class="fact"><p class="caption-5 quiet">适用工具</p><p class="title-3">华炬在线版、通用 Agent</p></div><div class="fact"><p class="caption-5 quiet">文件格式</p><p class="title-3">.docx</p></div><div class="fact"><p class="caption-5 quiet">可见范围</p><p class="title-3">公开</p></div></div>
+</div>
+<div class="wrap doc">
+  <article><section><h2 class="heading-6">能做什么</h2><ul class="body-3"><li><b>一键智能处理</b>：统一标点、字体、段落、页边距和页码。</li><li><b>格式诊断</b>：只检查问题，不改原文档。</li><li><b>四种预设</b>：公文、论文、法律文书、自定义。</li><li><b>自定义排版</b>（在线版）：自己设定页边距、各级文字、行距和页码，保存在浏览器里或导出 JSON 复用。</li><li><b>参照样板排版</b>（韩宇新增）：上传一份排好的文件，照着它的格式排。</li><li><b>修订标记</b>：改动以 Word 修订记录呈现，方便审阅。</li><li><b>文本转文档</b>：把纯文本或 Markdown 直接生成规范的 Word 文件。</li></ul></section><section><h2 class="heading-6">用法一：打开网页直接用</h2><p class="body-3">打开华炬在线版，拖入 .docx 文件，选处理方式，下载排好的新文件。文件只在你的浏览器里处理，不上传服务器。</p><p class="body-3">韩宇新增<b>参照样板排版</b>：再上传一份排好的样板（比如所里的律师函模板），就能照着它的格式排。</p></section><section><h2 class="heading-6">用法二：装进 AI 助手</h2><ol class="body-3"><li>下载右侧的技能包并解压。</li><li>把文件夹放进你所用 AI 助手的技能目录（Claude、WorkBuddy、OpenCode 等）。</li><li>对 AI 说：「按公文格式排版这份文件」或「检查这份文书的格式问题」。</li></ol><p class="body-3">会用命令行的，也可以直接运行：</p><code class="code">python scripts/process.py smart 输入.docx 输出.docx --preset official</code></section><section><h2 class="heading-6">注意</h2><ul class="body-3"><li>优先使用 .docx。.doc 和 .wps 需要在 Windows 上先转换。</li><li>处理前请备份重要文件。</li><li>排版结果仍需律师复核。</li></ul></section><section><h2 class="heading-6">开源说明</h2><p class="body-3">原项目 <a class="card-link" style="margin:0" href="https://github.com/KaguraNanaga/document-format-skills">document-format-skills</a>，作者 KaguraNanaga，MIT 协议。韩宇在其基础上增加了参照样板排版，并做了华炬在线版（含自定义排版）。</p></section></article>
+  <aside class="side" aria-label="获取方式"><p class="title-3">获取方式</p><a class="btn button-md" href="../tools/paiban/index.html">打开华炬在线版</a><a class="btn ghost button-md" href="../downloads/gongwen-paiban-skill.zip">下载技能包</a><a class="btn ghost button-md" href="https://github.com/KaguraNanaga/document-format-skills">查看开源代码</a><p class="caption-5 quiet">技能包已含参照样板排版功能（韩宇新增）。</p></aside>
+</div>
+</main>
+<footer>
+  <div class="wrap row">
+    <div>
+      <img src="../img/logo.png" width="216" height="41" alt="山西华炬律师事务所">
+      <p class="caption-5 quiet" style="margin-top:8px">Skill 集市 · skill.huajulaw.com</p>
+    </div>
+    <div style="max-width:520px">
+      <p class="caption-5 quiet">免责说明：技能输出仅为辅助，文书内容须由律师自行复核。平台不收集、不上传任何客户文件。</p>
+      <p class="caption-5 quiet">开源说明：排版助手改编自 document-format-skills（MIT 协议），保留原作者版权声明。</p>
+    </div>
+  </div>
+</footer>
+</body>
+</html>

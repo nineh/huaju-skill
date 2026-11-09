@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>在线排版 · 华炬 Skill 集市</title>
+<meta name="description" content="华炬在线排版：一键排成公文、法律文书格式，或参照样板文档排版。文件只在浏览器本地处理，不上传服务器。">
+<link rel="icon" type="image/png" href="../../img/mark.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Noto+Sans+SC:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../css/site.css">
+<link rel="stylesheet" href="paiban.css">
+</head>
+<body>
+<a class="skip button-sm" href="#main">跳到正文</a>
+<nav class="nav" aria-label="主导航">
+  <a class="brand title-3" href="../../index.html" aria-label="华炬 Skill 集市 首页"><img src="../../img/mark.png" width="28" height="28" alt="">华炬 Skill 集市</a>
+  <div class="nav-links title-4">
+    <a href="../../index.html#skills">首期上架</a>
+    <a class="on" href="#main">在线排版</a>
+    <a href="../../index.html#faq">常见问题</a>
+  </div>
+  <a class="btn button-sm" href="../../index.html#join">报名下期摊位</a>
+</nav>
+
+<main id="main" class="wrap tool-page">
+  <header class="tool-head">
+    <a class="crumb title-4" href="../../skills/gongwen-paiban.html"><svg width="16" height="16" viewBox="0 0 256 256" aria-hidden="true"><path d="M224 128a8 8 0 0 1-8 8H59.3l58.4 58.3a8 8 0 0 1-11.4 11.4l-72-72a8 8 0 0 1 0-11.4l72-72a8 8 0 0 1 11.4 11.4L59.3 120H216a8 8 0 0 1 8 8z" fill="currentColor"/></svg>公文排版助手</a>
+    <h1 class="heading-3">拖进文件，排好就下载</h1>
+    <p class="body-3 muted">一键排成公文或法律文书格式，也可以上传一份样板，照着它排。文件只在你的浏览器里处理，不上传服务器。</p>
+  </header>
+
+  <div class="engine" id="engine" role="status" aria-live="polite">
+    <div class="engine-bar"><span id="engine-fill"></span></div>
+    <p class="caption-4 quiet" id="engine-text">正在准备排版引擎，首次打开约需加载 20 MB…</p>
+  </div>
+
+  <section class="step" aria-labelledby="s1">
+    <div class="step-head"><span class="num title-4">01</span><h2 id="s1" class="title-2">选择要排版的文档</h2></div>
+    <label class="drop" id="drop-input" tabindex="0">
+      <input type="file" id="file-input" accept=".docx" hidden>
+      <span class="drop-icon" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 256 256"><path d="M213.7 82.3l-56-56A8 8 0 0 0 152 24H56a16 16 0 0 0-16 16v176a16 16 0 0 0 16 16h144a16 16 0 0 0 16-16V88a8 8 0 0 0-2.3-5.7zM160 51.3 188.7 80H160zM200 216H56V40h88v48a8 8 0 0 0 8 8h48z" fill="currentColor"/></svg></span>
+      <span class="drop-text">
+        <span class="title-3" data-empty="拖入 Word 文件，或点击选择">拖入 Word 文件，或点击选择</span>
+        <span class="caption-5 quiet">仅支持 .docx，单个文件 20 MB 以内</span>
+      </span>
+    </label>
+    <button type="button" class="link-btn caption-4" id="use-sample">没有文件？用示例试试</button>
+  </section>
+
+  <section class="step" aria-labelledby="s2">
+    <div class="step-head"><span class="num title-4">02</span><h2 id="s2" class="title-2">选择处理方式</h2></div>
+    <div class="modes" role="radiogroup" aria-label="处理方式">
+      <label class="mode"><input type="radio" name="mode" value="smart" checked>
+        <span class="title-3">一键排版</span><span class="body-6 muted">统一标点、字体、段落、页边距和页码</span></label>
+      <label class="mode"><input type="radio" name="mode" value="mimic">
+        <span class="title-3">参照样板排版 <span class="badge caption-3">韩宇新增</span></span><span class="body-6 muted">上传一份排好的文件，照着它的格式排</span></label>
+      <label class="mode"><input type="radio" name="mode" value="custom">
+        <span class="title-3">自定义排版</span><span class="body-6 muted">自己设定页面、各级文字和页码，可保存复用</span></label>
+      <label class="mode"><input type="radio" name="mode" value="analyze">
+        <span class="title-3">格式诊断</span><span class="body-6 muted">只检查问题，不修改文档</span></label>
+      <label class="mode"><input type="radio" name="mode" value="punctuation">
+        <span class="title-3">标点修复</span><span class="body-6 muted">只处理全角半角和中英文标点</span></label>
+    </div>
+
+    <div class="sub" id="sub-smart">
+      <label class="field"><span class="title-4">格式标准</span>
+        <select id="preset" class="body-6">
+          <option value="official">公文（GB/T 9704）</option>
+          <option value="legal">法律文书</option>
+          <option value="academic">学术论文</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="sub" id="sub-mimic" hidden>
+      <label class="drop small" id="drop-ref" tabindex="0">
+        <input type="file" id="file-ref" accept=".docx" hidden>
+        <span class="drop-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 256 256"><path d="M200 32h-36.3a47.8 47.8 0 0 0-71.4 0H56a16 16 0 0 0-16 16v168a16 16 0 0 0 16 16h144a16 16 0 0 0 16-16V48a16 16 0 0 0-16-16zm-72 0a32 32 0 0 1 32 32H96a32 32 0 0 1 32-32zm72 184H56V48h26.7A47.9 47.9 0 0 0 80 64v8a8 8 0 0 0 8 8h80a8 8 0 0 0 8-8v-8a47.9 47.9 0 0 0-2.7-16H200z" fill="currentColor"/></svg></span>
+        <span class="drop-text">
+          <span class="title-3" data-empty="拖入样板文件，或点击选择">拖入样板文件，或点击选择</span>
+          <span class="caption-5 quiet">一份格式排好的同类文书，比如所里的律师函模板</span>
+        </span>
+      </label>
+      <div class="ref-summary" id="ref-summary" hidden>
+        <p class="title-4">从样板中识别出的格式</p>
+        <ul class="body-6" id="ref-lines"></ul>
+      </div>
+    </div>
+
+    <div class="sub" id="sub-custom" hidden>
+      <div class="cbar">
+        <label class="field inline"><span class="title-4">从这里开始</span>
+          <select id="c-start">
+            <option value="official">公文（GB/T 9704）</option>
+            <option value="legal">法律文书</option>
+            <option value="academic">学术论文</option>
+            <option value="reference">刚上传的样板</option>
+          </select>
+        </label>
+        <button type="button" class="btn ghost button-sm" id="c-load">载入</button>
+        <label class="field inline"><span class="title-4">我的格式</span>
+          <select id="c-saved"><option value="">（未保存）</option></select>
+        </label>
+      </div>
+
+      <fieldset class="cgroup">
+        <legend class="title-4">页边距（厘米）</legend>
+        <div class="margins body-6">
+          <label>上 <input type="number" step="0.1" min="0" id="c-top"></label>
+          <label>下 <input type="number" step="0.1" min="0" id="c-bottom"></label>
+          <label>左 <input type="number" step="0.1" min="0" id="c-left"></label>
+          <label>右 <input type="number" step="0.1" min="0" id="c-right"></label>
+        </div>
+      </fieldset>
+
+      <fieldset class="cgroup">
+        <legend class="title-4">各级文字</legend>
+        <div class="ctable-wrap">
+          <table class="ctable body-6">
+            <thead><tr><th>元素</th><th>中文字体</th><th>字号</th><th>加粗</th><th>对齐</th><th>缩进(字)</th><th>行距(磅/倍)</th></tr></thead>
+            <tbody id="c-rows"></tbody>
+          </table>
+        </div>
+        <p class="caption-5 quiet">主送对象、落款、日期、附件、结束语跟随正文的字体、字号和行距。</p>
+      </fieldset>
+
+      <fieldset class="cgroup">
+        <legend class="title-4">页码</legend>
+        <div class="margins body-6">
+          <label><input type="checkbox" id="c-pn"> 添加页码</label>
+          <label>样式 <select id="c-pn-style"><option value="dash">— 1 —</option><option value="plain">1</option><option value="page_text">第 1 页</option><option value="page_total">第 1 页 共 N 页</option></select></label>
+          <label>位置 <select id="c-pn-pos"><option value="outside">单页居右、双页居左</option><option value="center">居中</option><option value="right">居右</option><option value="left">居左</option></select></label>
+        </div>
+      </fieldset>
+
+      <div class="cactions">
+        <input type="text" id="c-name" class="cname body-6" placeholder="格式名称，如：所里律师函" aria-label="格式名称">
+        <button type="button" class="btn ghost button-sm" id="c-save">保存为我的格式</button>
+        <button type="button" class="btn ghost button-sm" id="c-export">导出 JSON</button>
+        <label class="btn ghost button-sm" tabindex="0">导入 JSON<input type="file" id="c-import" accept=".json" hidden></label>
+        <span class="caption-5 quiet" id="c-msg"></span>
+      </div>
+    </div>
+
+    <details class="more">
+      <summary class="title-4">更多选项</summary>
+      <div class="opts body-6">
+        <label><input type="checkbox" id="opt-revision"> 修订模式：改动以 Word 修订记录显示</label>
+        <label><input type="checkbox" id="opt-nopage"> 不添加页码</label>
+        <label><input type="checkbox" id="opt-table"> 表格智能对齐</label>
+        <label class="field inline"><span>空格处理</span>
+          <select id="opt-space">
+            <option value="remove_all">删除中文间多余空格</option>
+            <option value="keep_en_boundary">保留中英文之间的空格</option>
+            <option value="keep_all">全部保留</option>
+          </select>
+        </label>
+      </div>
+    </details>
+  </section>
+
+  <section class="step" aria-labelledby="s3">
+    <div class="step-head"><span class="num title-4">03</span><h2 id="s3" class="title-2">开始处理</h2></div>
+    <button type="button" class="btn lg button-md" id="go" aria-disabled="true">开始排版</button>
+    <p class="caption-5 quiet" id="go-hint">请先选择文档</p>
+    <p class="error body-6" id="error" role="alert" hidden></p>
+    <div class="result" id="result" hidden>
+      <p class="title-3" id="result-title">排版完成</p>
+      <div class="chips" id="chips"></div>
+      <pre class="report body-6" id="report" hidden></pre>
+      <button type="button" class="btn button-md" id="download" hidden>下载排好的文件</button>
+      <p class="caption-5 quiet" id="download-note"></p>
+    </div>
+  </section>
+
+  <aside class="privacy caption-5 quiet">
+    处理全程在你的浏览器里完成：读取文件、排版、生成新文件，都不经过任何服务器。排版结果仍需律师复核。
+    排版引擎改编自开源项目 document-format-skills（MIT 协议）。参照样板排版与在线版由韩宇开发。
+  </aside>
+</main>
+
+<script src="app.js"></script>
+</body>
+</html>

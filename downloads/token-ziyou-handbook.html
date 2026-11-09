@@ -1,0 +1,2254 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>低成本实现 Token 自由 · 复制即用手册</title>
+<style>
+:root{
+  --navy:#0b1a35; --navy2:#16305a; --gold:#b08d44; --gold2:#8a6d2f;
+  --paper:#f7f4ec; --paper2:#fffdf7; --ink:#1e2a42; --gray:#43506b; --gray2:#7a8499;
+  --line:#d8cfb8; --code-bg:#0e1c33; --code-ink:#d6e0f0;
+  --green:#2f7d4f; --red:#b4452e; --blue:#2b5fa8;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:"Source Han Sans SC","Microsoft YaHei",sans-serif;background:var(--paper);color:var(--ink);line-height:1.85;-webkit-font-smoothing:antialiased}
+.doc{max-width:960px;margin:0 auto;padding:0 28px 90px}
+
+/* 封面 */
+header.cover{background:linear-gradient(155deg,var(--navy),var(--navy2));color:#f3f6fb;padding:64px 48px 54px;border-radius:0 0 18px 18px;margin-bottom:8px}
+header.cover .org{font-size:.85rem;letter-spacing:.28em;color:#c9d4e6;margin-bottom:26px}
+header.cover h1{font-family:"Source Han Serif SC","Noto Serif SC",serif;font-size:2.7rem;line-height:1.3;font-weight:700}
+header.cover h1 .g{color:#e7d3a2}
+header.cover .sub{margin-top:18px;color:#aebbd2;font-size:1.02rem;max-width:52ch}
+header.cover .meta{margin-top:30px;padding-top:20px;border-top:1px solid rgba(198,160,85,.35);font-size:.9rem;color:#9fb0c9;display:flex;gap:26px;flex-wrap:wrap}
+header.cover .meta b{color:#e7d3a2;font-weight:600}
+
+/* 三步卡片 */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:26px 0 8px}
+.steps .s{background:var(--paper2);border:1px solid var(--line);border-radius:12px;padding:18px 18px 16px}
+.steps .s .n{display:inline-flex;width:30px;height:30px;border-radius:50%;background:var(--navy);color:#e7d3a2;align-items:center;justify-content:center;font-weight:700;margin-bottom:10px}
+.steps .s h4{font-size:1rem;margin-bottom:6px}
+.steps .s p{font-size:.88rem;color:var(--gray);line-height:1.75}
+
+/* 目录导航 */
+nav.toc{background:var(--paper2);border:1px solid var(--line);border-radius:12px;padding:20px 24px;margin:22px 0}
+nav.toc h3{font-size:.85rem;letter-spacing:.2em;color:var(--gold2);margin-bottom:12px}
+nav.toc ol{list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:7px 26px;counter-reset:toc}
+nav.toc li{counter-increment:toc;font-size:.92rem}
+nav.toc li::before{content:counter(toc,decimal-leading-zero);color:var(--gold);font-weight:700;margin-right:9px;font-variant-numeric:tabular-nums}
+nav.toc a{color:var(--ink);text-decoration:none;border-bottom:1px dashed transparent}
+nav.toc a:hover{color:var(--gold2);border-color:var(--gold)}
+
+/* 章节 */
+section.ch{margin-top:46px;scroll-margin-top:20px}
+section.ch > h2{font-family:"Source Han Serif SC",serif;font-size:1.55rem;color:var(--navy);padding-bottom:.45em;border-bottom:3px solid var(--gold);margin-bottom:.5em}
+section.ch > h2 .no{color:var(--gold);margin-right:.5em}
+h3{font-size:1.12rem;color:var(--navy);margin:1.7em 0 .55em;padding-left:.55em;border-left:5px solid var(--gold)}
+h4{font-size:1rem;color:var(--navy2);margin:1.3em 0 .4em}
+p{font-size:.95rem;color:#33415c;margin:.6em 0}
+ul,ol{padding-left:1.5em;margin:.55em 0}
+li{font-size:.95rem;color:#33415c;margin:.32em 0}
+strong{color:var(--navy)}
+code.inline{background:#ece5d3;padding:1px 7px;border-radius:4px;font-size:.88em;font-family:Consolas,monospace;color:#7a5a17}
+
+/* 表格 */
+table{width:100%;border-collapse:collapse;margin:1em 0;font-size:.88rem}
+th{background:var(--navy);color:#e7d3a2;padding:9px 11px;text-align:left;font-weight:600;white-space:nowrap}
+td{border:1px solid var(--line);padding:9px 11px;vertical-align:top;color:#33415c;background:var(--paper2)}
+tbody tr:nth-child(even) td{background:#f1ebdc}
+
+/* 代码块 + 复制 */
+pre{position:relative;background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:18px 20px 16px;overflow:auto;font-family:Consolas,"Cascadia Code",monospace;font-size:.83rem;line-height:1.7;margin:1em 0;white-space:pre}
+pre .cmt{color:#7e8ca4}
+.copybtn{position:absolute;top:9px;right:9px;background:rgba(198,160,85,.16);border:1px solid rgba(198,160,85,.55);color:#e7d3a2;border-radius:6px;padding:4px 12px;font-size:.76rem;cursor:pointer;font-family:inherit;transition:background .2s}
+.copybtn:hover{background:rgba(198,160,85,.34)}
+.copybtn.done{background:rgba(47,125,79,.35);border-color:#58b07e;color:#bfe8cf}
+
+/* 提示框 */
+.box{border-radius:0 10px 10px 0;padding:13px 18px;margin:1.1em 0;font-size:.9rem}
+.box.tip{background:#e9f1ec;border-left:4px solid var(--green);color:#25543a}
+.box.warn{background:#f8e9e3;border-left:4px solid var(--red);color:#84382a}
+.box.note{background:#e8eef8;border-left:4px solid var(--blue);color:#27406b}
+.box.gold{background:#f3ecd9;border-left:4px solid var(--gold);color:#5d4a1f}
+.box .t{font-weight:700;display:block;margin-bottom:3px}
+
+/* 标签徽章 */
+.badge{display:inline-block;font-size:.74rem;padding:2px 10px;border-radius:20px;margin-left:8px;vertical-align:middle;font-weight:600}
+.badge.easy{background:#e9f1ec;color:var(--green)}
+.badge.pro{background:#f3ecd9;color:var(--gold2)}
+.badge.must{background:#f8e9e3;color:var(--red)}
+
+/* 原理图 */
+.flow{background:var(--paper2);border:1px solid var(--line);border-radius:12px;padding:22px;margin:1.2em 0;font-size:.86rem}
+.flow .row{display:flex;align-items:center;gap:10px;justify-content:center;flex-wrap:wrap}
+.flow .node{background:var(--navy);color:#eef2f9;border-radius:9px;padding:10px 16px;text-align:center;min-width:118px}
+.flow .node small{display:block;color:#9fb0c9;font-size:.74rem;margin-top:2px}
+.flow .node.g{background:linear-gradient(150deg,#8a6d2f,#b08d44);color:#fff}
+.flow .arr{color:var(--gold);font-size:1.25rem;font-weight:700}
+.flow .alt{text-align:center;color:var(--gray2);font-size:.8rem;margin-top:12px}
+
+/* 演进阶梯 */
+.level{border:1px solid var(--line);border-left:6px solid var(--gray2);border-radius:10px;padding:14px 18px;margin:13px 0;background:var(--paper2)}
+.level .hd{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:5px}
+.level .lv{font-family:Consolas,monospace;font-weight:700;color:var(--gold2);font-size:.95rem;flex:0 0 auto}
+.level h4{margin:0;font-size:1.02rem}
+.level .do{font-size:.92rem;color:#33415c;margin:.3em 0}
+.level .res{font-size:.88rem;margin:.5em 0 0;padding:9px 13px;border-radius:7px;background:#f3eee1}
+.level .res b.ok{color:var(--green)} .level .res b.bad{color:var(--red)} .level .res b.next{color:var(--blue)}
+.level.peak{border-left-color:var(--gold);background:#fbf7ea}
+.level .map{display:block;margin-top:.55em;font-size:.8rem;color:var(--blue)}
+.level .map a{color:var(--blue);text-decoration:none;border-bottom:1px dashed var(--blue)}
+/* 技能组装栈 */
+.stack{margin:1.2em 0;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.stack .layer{display:flex;align-items:center;gap:14px;padding:12px 18px;font-size:.9rem;border-bottom:1px solid var(--line)}
+.stack .layer:last-child{border-bottom:none}
+.stack .layer .lt{flex:0 0 96px;font-weight:700;color:var(--navy)}
+.stack .layer .ld{color:#4a5670}
+.stack .l-check{background:#e9f1ec}.stack .l-pro{background:#f3ecd9}.stack .l-out{background:#e8eef8}.stack .l-base{background:#f1ebdc}
+
+/* 通用折叠（打印保留） */
+details.collapse{margin:1.1em 0;border:1px solid var(--line);border-radius:10px;background:var(--paper2)}
+details.collapse summary{cursor:pointer;padding:11px 18px;font-weight:600;color:var(--navy);font-size:.9rem;list-style:none}
+details.collapse summary::before{content:"▸ 查看 ";color:var(--gold)}
+details.collapse[open] summary::before{content:"▾ 收起 "}
+details.collapse .inner{padding:0 18px 14px;font-size:.88rem}
+details.collapse .src{color:var(--gray2);font-size:.8rem;margin-top:8px}
+
+/* ===== 第九章：Skill 制作现场演示 ===== */
+.dm-demo{background:var(--paper2);border:1px solid var(--line);border-radius:14px;overflow:hidden;margin:1.4em 0;box-shadow:0 6px 22px rgba(11,26,53,.08)}
+.dm-controls{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:14px 20px;background:linear-gradient(155deg,var(--navy),var(--navy2));color:#dbe4f2}
+.dm-btn{border:1px solid rgba(198,160,85,.6);background:rgba(198,160,85,.16);color:#e7d3a2;border-radius:8px;padding:7px 18px;font-size:.86rem;font-family:inherit;font-weight:600;cursor:pointer;transition:background .2s}
+.dm-btn:hover{background:rgba(198,160,85,.34)}
+.dm-btn:disabled{opacity:.4;cursor:not-allowed}
+.dm-dots{display:flex;align-items:center;gap:0;margin-left:auto;flex-wrap:wrap}
+.dm-dot{display:flex;align-items:center;gap:7px;background:none;border:none;color:#aebbd2;font-family:inherit;font-size:.78rem;cursor:pointer;padding:4px 2px;white-space:nowrap}
+.dm-dot .b{display:inline-flex;width:24px;height:24px;border-radius:50%;border:1.5px solid #5c6f90;align-items:center;justify-content:center;font-size:.74rem;font-weight:700;font-variant-numeric:tabular-nums}
+.dm-dot.done .b{background:var(--gold);border-color:var(--gold);color:#fff}
+.dm-dot.active{color:#e7d3a2;font-weight:700}
+.dm-dot.active .b{background:#e7d3a2;border-color:#e7d3a2;color:var(--navy)}
+.dm-dot .ln{width:16px;height:2px;background:#3a4d6e;margin:0 3px}
+.dm-dot:first-child .ln{display:none}
+.dm-progress-wrap{height:4px;background:#e2dac8}
+.dm-progress{height:100%;width:0;background:linear-gradient(90deg,#8a6d2f,#b08d44);transition:width .35s ease}
+.dm-stage{display:none;padding:24px 26px 28px;animation:dmFade .45s ease}
+.dm-stage.active{display:block}
+@keyframes dmFade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.dm-stage-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+.dm-stage-head .sn{font-family:Consolas,monospace;font-weight:700;color:var(--gold2)}
+.dm-stage-head h4{margin:0;font-size:1.08rem}
+.dm-stage-sub{font-size:.86rem;color:var(--gray);margin:0 0 16px}
+.dm-counter{margin-left:auto;font-family:Consolas,monospace;font-size:.82rem;color:var(--gold2);background:#f3ecd9;border-radius:20px;padding:3px 13px;font-weight:700}
+.dm-art-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+.dm-art{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:10px;padding:11px 13px;background:#fffdf7;opacity:0;transform:translateY(12px);transition:all .4s ease;font-size:.84rem}
+.dm-art.show{opacity:1;transform:none}
+.dm-art .idx{flex:0 0 26px;height:26px;border-radius:7px;background:var(--navy);color:#e7d3a2;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.78rem;font-variant-numeric:tabular-nums}
+.dm-art .at{flex:1;min-width:0}
+.dm-art .at a{color:var(--navy);text-decoration:none;font-weight:600;line-height:1.45;display:block}
+.dm-art .at a:hover{color:var(--gold2);text-decoration:underline}
+.dm-art .au{display:block;color:var(--gray2);font-size:.74rem;margin-top:2px}
+.dm-art.g-feat .idx{background:#16305a}
+.dm-art.g-eli .idx{background:#8a6d2f}
+.dm-art.g-new .idx{background:#2f7d4f}
+.dm-tag{display:inline-block;font-size:.68rem;border-radius:5px;padding:1px 7px;margin-right:5px;font-weight:700;vertical-align:1px}
+.dm-tag.t-feat{background:#e3e9f4;color:#16305a}
+.dm-tag.t-eli{background:#f3ecd9;color:#8a6d2f}
+.dm-tag.t-new{background:#e9f1ec;color:#2f7d4f}
+.dm-terminal{background:var(--code-bg);border-radius:10px;overflow:hidden;font-family:Consolas,"Cascadia Code",monospace;font-size:.82rem}
+.dm-terminal .bar{display:flex;align-items:center;gap:7px;padding:9px 14px;background:#0a1628;border-bottom:1px solid rgba(198,160,85,.25)}
+.dm-terminal .bar i{width:10px;height:10px;border-radius:50%;display:inline-block}
+.dm-terminal .bar i:nth-child(1){background:#e06c5b}.dm-terminal .bar i:nth-child(2){background:#e0b45b}.dm-terminal .bar i:nth-child(3){background:#5bb878}
+.dm-terminal .bar span{color:#7e8ca4;font-size:.74rem;margin-left:6px}
+.dm-terminal .screen{padding:16px 18px;min-height:250px;color:var(--code-ink);line-height:1.85}
+.dm-log{opacity:0;transition:opacity .3s;white-space:pre-wrap}
+.dm-log.show{opacity:1}
+.dm-log .ok{color:#7fd6a0}.dm-log .gold{color:#e7d3a2}.dm-log .dim{color:#7e8ca4}.dm-log .warn{color:#e8a87c}
+.dm-caret{display:inline-block;width:8px;height:15px;background:#e7d3a2;vertical-align:-2px;animation:dmBlink 1s steps(1) infinite}
+@keyframes dmBlink{50%{opacity:0}}
+.dm-verify-list{border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.dm-vrow{display:flex;align-items:center;gap:12px;padding:11px 16px;background:var(--paper2);border-bottom:1px solid var(--line);font-size:.86rem;opacity:0;transform:translateX(-10px);transition:all .35s ease}
+.dm-vrow.show{opacity:1;transform:none}
+.dm-vrow:last-child{border-bottom:none}
+.dm-vrow .st{flex:0 0 86px;font-size:.72rem;font-weight:700;border-radius:6px;padding:3px 0;text-align:center}
+.dm-vrow .st.loading{background:#e8eef8;color:var(--blue)}
+.dm-vrow .st.ok{background:#e9f1ec;color:var(--green)}
+.dm-vrow .nm{flex:1;color:#33415c}
+.dm-vrow .lv{flex:0 0 auto;font-size:.72rem;font-weight:700;border-radius:5px;padding:2px 8px}
+.dm-vrow .lv.A{background:#f8e9e3;color:var(--red)}.dm-vrow .lv.B{background:#f3ecd9;color:var(--gold2)}
+.dm-vrow .ck{flex:0 0 52px;font-size:.76rem;color:var(--gray2);font-family:Consolas,monospace}
+.dm-vrow.verified .ck{color:var(--green);font-weight:700}
+.dm-note-line{margin-top:12px;font-size:.84rem;border-radius:8px;padding:10px 14px;background:#f8e9e3;border-left:4px solid var(--red);color:#84382a}
+.dm-matrix{border:1px solid var(--line);border-radius:10px;overflow:hidden;overflow-x:auto}
+.dm-matrix table{margin:0;font-size:.8rem;min-width:680px}
+.dm-matrix th{font-size:.78rem}
+.dm-matrix td{opacity:0;transition:opacity .4s ease}
+.dm-matrix td.show{opacity:1}
+.dm-matrix td .k{display:block;font-weight:700;color:var(--navy);margin-bottom:2px}
+
+/* STEP4 深度推理组件 */
+.dm-subtabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.dm-subtab{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:#fffdf7;border-radius:22px;padding:7px 15px;font-family:inherit;font-size:.82rem;color:var(--gray);cursor:pointer;transition:all .25s}
+.dm-subtab .n{display:inline-flex;width:21px;height:21px;border-radius:50%;background:#e2dac8;color:var(--navy);align-items:center;justify-content:center;font-weight:700;font-size:.74rem;font-variant-numeric:tabular-nums}
+.dm-subtab.active{background:var(--navy);border-color:var(--navy);color:#e7d3a2;font-weight:700}
+.dm-subtab.active .n{background:#e7d3a2;color:var(--navy)}
+.dm-subpane{display:none;animation:dmFade .4s ease}
+.dm-subpane.active{display:block}
+.dm-pane-title{font-size:.88rem;font-weight:700;color:var(--navy);margin:0 0 4px}
+.dm-pane-note{font-size:.8rem;color:var(--gray2);margin:0 0 12px}
+.dm-tree{border:1px solid var(--line);border-radius:10px;background:#fffdf7;padding:16px 18px;font-size:.84rem}
+.dm-tree ul{list-style:none;padding:0;margin:0}
+.dm-tree .root{font-weight:700;color:var(--navy);font-size:.9rem;margin-bottom:10px}
+.dm-tree .root .src{font-weight:400;color:var(--gray2);font-size:.74rem;margin-left:8px}
+.dm-tree .branch{margin:8px 0 8px 22px;padding-left:16px;border-left:2px solid var(--line)}
+.dm-tree .branch .bh{font-weight:700;color:var(--gold2)}
+.dm-tree .leaf{display:block;color:#33415c;margin:4px 0 4px 18px;position:relative;padding-left:14px;opacity:0;transform:translateX(-8px);transition:all .35s}
+.dm-tree .leaf.show{opacity:1;transform:none}
+.dm-tree .leaf::before{content:"▸";position:absolute;left:0;color:var(--gold)}
+.dm-tree .leaf .cite{color:var(--blue);font-size:.74rem;margin-left:6px;font-family:Consolas,monospace}
+.dm-tree .leaf .prob{color:var(--red);font-size:.72rem;margin-left:6px;font-weight:700}
+.dm-evtable{width:100%;border-collapse:collapse;font-size:.8rem;margin:0}
+.dm-evtable th{background:var(--navy2);font-size:.76rem;padding:8px 10px}
+.dm-evtable td{border:1px solid var(--line);padding:8px 10px;background:#fffdf7;vertical-align:top;opacity:0;transition:opacity .4s}
+.dm-evtable td.show{opacity:1}
+.dm-pill{display:inline-block;font-size:.7rem;font-weight:700;border-radius:5px;padding:2px 8px;white-space:nowrap}
+.dm-pill.ok{background:#e9f1ec;color:var(--green)}
+.dm-pill.warn{background:#f8e9e3;color:var(--red)}
+.dm-pill.hold{background:#f3ecd9;color:var(--gold2)}
+.dm-reason{background:var(--code-bg);border-radius:10px;padding:16px 18px;font-family:Consolas,"Cascadia Code",monospace;font-size:.8rem;line-height:1.85;color:var(--code-ink);min-height:260px}
+.dm-rline{opacity:0;transition:opacity .3s;white-space:pre-wrap}
+.dm-rline.show{opacity:1}
+.dm-rline .hd{color:#e7d3a2;font-weight:700}
+.dm-rline .ok{color:#7fd6a0}.dm-rline .warn{color:#e8a87c}.dm-rline .dim{color:#7e8ca4}.dm-rline .blue{color:#8fb8ef}
+.dm-rline .indent{padding-left:1.6em}
+.dm-concl{margin-top:12px;border-radius:8px;padding:11px 15px;font-size:.83rem;background:#e9f1ec;border-left:4px solid var(--green);color:#25543a;opacity:0;transition:opacity .4s}
+.dm-concl.show{opacity:1}
+.dm-codegen{background:var(--code-bg);border-radius:10px;overflow:hidden}
+.dm-codegen .bar{display:flex;align-items:center;gap:7px;padding:9px 14px;background:#0a1628;border-bottom:1px solid rgba(198,160,85,.25)}
+.dm-codegen .bar i{width:10px;height:10px;border-radius:50%;display:inline-block}
+.dm-codegen .bar i:nth-child(1){background:#e06c5b}.dm-codegen .bar i:nth-child(2){background:#e0b45b}.dm-codegen .bar i:nth-child(3){background:#5bb878}
+.dm-codegen .bar span{color:#7e8ca4;font-size:.74rem;margin-left:6px;font-family:Consolas,monospace}
+.dm-codegen .body{padding:16px 18px;min-height:240px;max-height:420px;overflow:auto;font-family:Consolas,"Cascadia Code",monospace;font-size:.78rem;line-height:1.75;color:var(--code-ink);white-space:pre-wrap}
+.dm-codeline{opacity:0;transition:opacity .25s}
+.dm-codeline.show{opacity:1}
+.dm-codeline .h1{color:#e7d3a2;font-weight:700}
+.dm-codeline .h2{color:#8fb8ef;font-weight:700}
+.dm-codeline .cmt{color:#7e8ca4}
+.dm-codeline .kw{color:#e8a87c}
+.dm-codeline .cite{color:#7fd6a0}
+.dm-done-tag{display:inline-flex;align-items:center;gap:6px;margin-top:12px;background:#e9f1ec;color:var(--green);font-weight:700;font-size:.82rem;border-radius:20px;padding:5px 15px;opacity:0;transition:opacity .4s}
+.dm-done-tag.show{opacity:1}
+
+/* 四特征量化评分表（可交互试算） */
+.dm-scorer{border:1px solid var(--line);border-radius:12px;background:#fffdf7;padding:18px 20px;margin-top:16px}
+.dm-scorer h4{margin:0 0 4px;font-size:.98rem;color:var(--navy)}
+.dm-scorer .hint{font-size:.78rem;color:var(--gray2);margin:0 0 14px}
+.dm-score-group{margin-bottom:14px}
+.dm-score-group .gt{font-weight:700;color:var(--gold2);font-size:.86rem;margin-bottom:7px;display:flex;align-items:center;gap:8px}
+.dm-score-group .gt .gscore{font-family:Consolas,monospace;font-size:.74rem;background:#f3ecd9;border-radius:12px;padding:1px 9px;color:var(--gold2)}
+.dm-score-item{display:flex;align-items:center;gap:10px;padding:7px 10px;border-bottom:1px dashed var(--line);font-size:.82rem;flex-wrap:wrap}
+.dm-score-item:last-child{border-bottom:none}
+.dm-score-item .q{flex:1;min-width:200px;color:#33415c}
+.dm-score-item .seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.dm-score-item .seg label{padding:4px 12px;font-size:.76rem;cursor:pointer;color:var(--gray);background:#fffdf7;border-right:1px solid var(--line);user-select:none;transition:all .2s}
+.dm-score-item .seg label:last-child{border-right:none}
+.dm-score-item .seg input{display:none}
+.dm-score-item .seg label[data-v="2"]:hover{background:#f8e9e3}
+.dm-score-item .seg label[data-v="1"]:hover{background:#f3ecd9}
+.dm-score-item .seg label[data-v="0"]:hover{background:#e9f1ec}
+.dm-score-item .seg input:checked + label{font-weight:700}
+.dm-score-item .seg input[value="2"]:checked + label{background:var(--red);color:#fff;border-color:var(--red)}
+.dm-score-item .seg input[value="1"]:checked + label{background:var(--gold);color:#fff;border-color:var(--gold)}
+.dm-score-item .seg input[value="0"]:checked + label{background:var(--green);color:#fff;border-color:var(--green)}
+.dm-score-summary{display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-top:16px;padding-top:14px;border-top:2px solid var(--line)}
+.dm-score-num{font-family:Consolas,monospace;font-size:1.6rem;font-weight:700;color:var(--navy);line-height:1}
+.dm-score-num small{font-size:.8rem;color:var(--gray2);font-weight:400}
+.dm-score-bar{flex:1;min-width:180px;height:10px;border-radius:6px;background:#ece5d3;overflow:hidden}
+.dm-score-bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#2f7d4f,#b08d44,#b4452e);transition:width .4s ease}
+.dm-score-reset{border:1px solid var(--line);background:#fffdf7;border-radius:8px;padding:6px 14px;font-family:inherit;font-size:.78rem;cursor:pointer;color:var(--gray)}
+.dm-score-reset:hover{border-color:var(--gold);color:var(--gold2)}
+.dm-targets{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+.dm-target{border:1.5px solid var(--line);border-radius:10px;padding:11px 13px;font-size:.8rem;background:#fffdf7;opacity:.55;transition:all .3s}
+.dm-target .tn{font-weight:700;color:var(--navy);display:block;margin-bottom:3px}
+.dm-target .tr{font-size:.74rem;color:var(--gray2)}
+.dm-target.t1.active{border-color:var(--green);background:#e9f1ec;opacity:1}
+.dm-target.t2.active{border-color:var(--gold);background:#f3ecd9;opacity:1}
+.dm-target.t3.active{border-color:var(--red);background:#f8e9e3;opacity:1}
+.dm-hardrule{margin-top:12px;font-size:.8rem;border-radius:8px;padding:10px 14px;background:#f8e9e3;border-left:4px solid var(--red);color:#84382a;display:none}
+.dm-hardrule.show{display:block}
+
+/* 成品阅读器：完整 Skill 全文 */
+.dm-reader{margin-top:16px;border:1.5px solid var(--navy);border-radius:12px;overflow:hidden;background:#fffdf7}
+.dm-reader-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 16px;background:linear-gradient(155deg,var(--navy),var(--navy2));color:#dbe4f2}
+.dm-reader-bar .rt{font-weight:700;color:#e7d3a2;font-size:.9rem;flex:1;min-width:180px}
+.dm-reader-bar .rs{font-size:.74rem;color:#9fb0c9;font-family:Consolas,monospace}
+.dm-reader-btn{border:1px solid rgba(198,160,85,.6);background:rgba(198,160,85,.16);color:#e7d3a2;border-radius:7px;padding:6px 14px;font-size:.78rem;font-family:inherit;font-weight:600;cursor:pointer;transition:background .2s}
+.dm-reader-btn:hover{background:rgba(198,160,85,.34)}
+.dm-reader-btn.done{background:rgba(47,125,79,.4);border-color:#58b07e;color:#bfe8cf}
+.dm-reader-body{max-height:0;overflow:hidden;transition:max-height .5s ease}
+.dm-reader.open .dm-reader-body{max-height:560px;overflow:auto}
+.dm-reader-body pre{margin:0;border-radius:0;max-height:none}
+.dm-reuse{margin-top:14px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.dm-reuse .step{border:1px solid var(--line);border-radius:10px;padding:12px 14px;background:#fffdf7;font-size:.8rem}
+.dm-reuse .step b{display:block;color:var(--navy);margin-bottom:4px;font-size:.84rem}
+.dm-reuse .step .no2{color:var(--gold);font-family:Consolas,monospace;font-weight:700;margin-right:6px}
+.dm-pulse{animation:dmPulse 1.6s ease-in-out 2}
+@keyframes dmPulse{0%,100%{box-shadow:0 0 0 0 rgba(176,141,68,0)}50%{box-shadow:0 0 0 6px rgba(176,141,68,.25)}}
+.dm-filecard{border:1.5px solid var(--gold);border-radius:12px;background:linear-gradient(160deg,#fbf7ea,#fffdf7);padding:20px 22px;opacity:0;transform:translateY(14px);transition:all .5s ease}
+.dm-filecard.show{opacity:1;transform:none}
+.dm-filecard .fname{font-family:Consolas,monospace;font-weight:700;color:var(--navy);font-size:1rem;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.dm-filecard .fname .ficon{display:inline-flex;width:30px;height:30px;border-radius:8px;background:var(--navy);color:#e7d3a2;align-items:center;justify-content:center;font-size:.82rem}
+.dm-filecard .meta{font-size:.78rem;color:var(--gray2);margin:8px 0 12px}
+.dm-toc-list{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:1fr 1fr;gap:6px 22px}
+.dm-toc-list li{font-size:.84rem;color:#33415c;padding:5px 0 5px 30px;position:relative;counter-increment:dmtoc;opacity:0;transition:opacity .35s}
+.dm-toc-list{counter-reset:dmtoc}
+.dm-toc-list li::before{content:counter(dmtoc,decimal-leading-zero);position:absolute;left:0;top:5px;color:var(--gold);font-weight:700;font-family:Consolas,monospace;font-size:.8rem}
+.dm-toc-list li.show{opacity:1}
+.dm-bridge{margin-top:14px;font-size:.86rem;border-radius:8px;padding:11px 15px;background:#e8eef8;border-left:4px solid var(--blue);color:#27406b}
+.dm-bridge a{color:var(--blue);font-weight:700;text-decoration:none;border-bottom:1px dashed var(--blue)}
+.dm-prompt-intro{font-size:.9rem;color:#33415c;margin:.8em 0}
+
+footer{margin-top:60px;padding-top:22px;border-top:1px solid var(--line);color:var(--gray2);font-size:.82rem;text-align:center;line-height:1.9}
+@media print{
+  .copybtn{display:none}
+  header.cover{border-radius:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  details.collapse .inner{display:block!important}
+  section.ch{page-break-inside:avoid}
+  pre,table{page-break-inside:avoid}
+  body{background:#fff}
+  .dm-controls,.dm-progress-wrap{display:none!important}
+  .dm-stage{display:block!important;opacity:1!important;page-break-inside:avoid}
+  .dm-art,.dm-log,.dm-vrow,.dm-matrix td,.dm-filecard,.dm-toc-list li,.dm-tree .leaf,.dm-evtable td,.dm-rline,.dm-codeline,.dm-concl,.dm-done-tag{opacity:1!important;transform:none!important}
+  .dm-subpane{display:block!important}
+  .dm-subtabs{display:none}
+  .dm-demo{box-shadow:none}
+  .dm-target{opacity:1!important}
+  .dm-hardrule{display:block!important}
+  .dm-reader-body{max-height:none!important;overflow:visible!important}
+  .dm-reuse{grid-template-columns:1fr}
+}
+@media (max-width:760px){
+  .steps{grid-template-columns:1fr}
+  nav.toc ol{grid-template-columns:1fr}
+  header.cover{padding:42px 26px}
+  header.cover h1{font-size:2rem}
+  .dm-dots{margin-left:0;width:100%}
+  .dm-dot .ln{display:none}
+  .dm-dots{justify-content:space-between}
+  .dm-dot span:not(.b):not(.ln){display:none}
+  .dm-stage{padding:18px 15px 20px}
+  .dm-toc-list{grid-template-columns:1fr}
+  .dm-subtab{padding:6px 11px;font-size:.76rem}
+  .dm-reason,.dm-codegen .body{font-size:.74rem}
+  .dm-targets{grid-template-columns:1fr}
+  .dm-score-item .seg label{padding:4px 8px;font-size:.72rem}
+  .dm-scorer{padding:14px 13px}
+}
+</style>
+</head>
+<body>
+<div class="doc">
+
+<header class="cover">
+  <div class="org">山西华炬律师事务所 · 月度例会分享材料</div>
+  <h1>低成本实现 <span class="g">Token 自由</span><br><span style="font-size:1.35rem;font-weight:400;color:#c9d4e6">一份复制即用的个人 AI 工作台搭建笔记</span></h1>
+  <p class="sub">这是我自己摸索大半年攒下来的一份笔记，不讲故事，只给能直接拿走的东西：每一段配置、每一份提示词、每一个脚本，整段复制、换上你自己的密钥就能用；哪一步适合你、哪一步先不用碰，我也都标了出来。</p>
+  <div class="meta">
+    <span>分享人 <b>牛家成 · 律师</b></span>
+    <span>2026 年 11 月 6 日</span>
+    <span>所有密钥均为占位符，请替换为本人密钥</span>
+  </div>
+</header>
+
+<div class="steps">
+  <div class="s"><span class="n">1</span><h4>对号入座</h4><p>先看下方"场景导航"，找到你现在要解决的那件事，直接跳到对应章节。</p></div>
+  <div class="s"><span class="n">2</span><h4>整段复制</h4><p>每个代码框右上角都有「复制」按钮；文中 <code class="inline">sk_你的KEY</code> 一类字样是占位符。</p></div>
+  <div class="s"><span class="n">3</span><h4>换上你的密钥</h4><p>密钥等同密码，只保存在本机文件里，最后一步由你本人粘贴，不发群、不进截图。</p></div>
+</div>
+
+<nav class="toc">
+  <h3>场景导航索引 · 想干什么就翻哪章</h3>
+  <ol>
+    <li><a href="#ch0">第零章　先把工作台装上（没装过的从这开始）</a></li>
+    <li><a href="#ch1">第一章　Token 自由：套餐方案、滚动接力与合规边界</a></li>
+    <li><a href="#ch2">第二章　查得准：元典法规案例库接入与多账号降级规则</a></li>
+    <li><a href="#ch3">第三章　读得进：OCR 深读流程，与刑事卷宗上云的合规边界</a></li>
+    <li><a href="#ch4">第四章　五级演进：从"读都没读"到"按你的标准交付"</a></li>
+    <li><a href="#ch5">第五章　靠得住：《质量优先》铁律与全局技能保存方法</a></li>
+    <li><a href="#ch6">第六章　不会写代码：把要求说清楚，让 AI 替你搭</a></li>
+    <li><a href="#ch7">第七章　两条不能让的线：数据与专业责任</a></li>
+    <li><a href="#ch8">第八章　上手前最常问的八个问题（排错 FAQ）</a></li>
+    <li><a href="#ch9">附录章　现场演示：13 篇专业文章如何炼成一个涉黑辩护 Skill</a></li>
+  </ol>
+</nav>
+
+<!-- ================= 第零章 ================= -->
+<section class="ch" id="ch0">
+  <h2><span class="no">00</span>先把工作台装上</h2>
+  <p>本手册以命令行 AI 助手 <strong>opencode</strong> 为示例（同类工具的配置思路相通）。它的配置只有一个文件 <code class="inline">opencode.json</code>，模型、代理、专业数据库都在这一个文件里接线。</p>
+
+  <h3>双入口：先判断你在哪条路</h3>
+  <table>
+    <thead><tr><th>你的现状</th><th>走哪条路</th></tr></thead>
+    <tbody>
+      <tr><td>没装过任何命令行 AI 工具，看到"终端"就发怵</td><td>路线 A：不用自己研究安装，把下面这段话整段发给任意一个 AI 助手，让它带你装</td></tr>
+      <tr><td>已经装好 opencode（或同类工具），能正常对话</td><td>路线 B：跳过本章，直接从<a href="#ch1">第一章</a>开始接线</td></tr>
+    </tbody>
+  </table>
+
+  <h3>路线 A · 零基础安装话术（整段复制发给 AI）<span class="badge easy">零门槛</span></h3>
+<pre>我的电脑是 Windows，我要安装 opencode 这个命令行 AI 助手，请你当我的安装向导：
+1. 先告诉我安装它需要哪些前置条件（如 Node.js），并给出检查我电脑上是否已安装的具体命令；
+2. 每一步只给我一条要执行的命令，并解释这条命令在做什么，等我执行成功、把结果发给你后，再给下一步；
+3. 安装完成后，教我怎么确认它装好了（版本命令），再带我完成第一次对话；
+4. 告诉我配置文件 opencode.json 在我这台电脑上的完整路径；
+5. 全程不要让我关闭杀毒软件，也不要让我执行来路不明的脚本。</pre>
+  <div class="box note"><span class="t">一句过来人话</span>装工具本身通常只要十几分钟。真正拦住人的从来不是难度，是"陌生"两个字，这是我自己踩过来的体会。</div>
+</section>
+
+<!-- ================= 第一章 ================= -->
+<section class="ch" id="ch1">
+  <h2><span class="no">01</span>Token 自由：先算清账，再给方案</h2>
+
+  <h3>1.1 一笔真实的成本账（优惠活动截止 2026 年 11 月 8 日）</h3>
+  <p>火山引擎方舟有一档 <strong>Coding Plan Lite &amp; Pro 套餐 2.5 折普惠活动</strong>，活动期 <strong>2026 年 6 月 8 日至 11 月 8 日</strong>，名额有限、先到先得；每个账号最多享受首两个月特惠，第三个月起恢复原价。官方规则见：<br>
+  <a href="https://ark.volcengine.com/region:cn-beijing/docs/coding-plan-personal-universal-promotion#promotion-period" target="_blank" rel="noopener">ark.volcengine.com · Coding Plan 个人普惠活动说明</a></p>
+  <details class="collapse">
+    <summary>官方活动规则要点（摘录，以页面最新内容为准）</summary>
+    <div class="inner">
+      <p><strong>活动时间：</strong>2026 年 6 月 8 日至 2026 年 11 月 8 日。</p>
+      <p><strong>活动对象：</strong>所有用户，名额有限，先到先得。</p>
+      <p><strong>适用档位：</strong>Lite 原价 40 元 / 月、特惠 9.9 元；Pro 原价 200 元 / 月、特惠 49.9 元。活动期内每个账号最多享受两个月特惠，新购、续费、升配共享同一优惠资格，第三个月起恢复原价。</p>
+      <p><strong>特别说明：</strong>① 多个账户通过同一手机号、同一证件号、同一账号 ID，或经排查为同一实际控制人的，均视为"同一用户"；② 对恶意抢占活动资源、批量刷单及其他任何采用非常规手段影响活动公平性和违反服务协议及规则的行为，火山引擎有权取消用户活动资格并回收奖励包资源，必要时追究法律责任；③ 平台可根据运营情况调整或终止活动，规则最终解释权归平台。</p>
+      <p class="src">来源：火山引擎方舟官方文档（Coding Plan Lite &amp; Pro 套餐 2.5 折普惠活动），抓取于 2026-11-04，使用前请重新打开链接核对最新版本。</p>
+    </div>
+  </details>
+  <table>
+    <thead><tr><th>档位</th><th>原价</th><th>活动价（首两个月）</th></tr></thead>
+    <tbody>
+      <tr><td>Lite</td><td>40 元 / 月</td><td><strong>9.9 元 / 月</strong></td></tr>
+      <tr><td>Pro</td><td>200 元 / 月</td><td><strong>49.9 元 / 月</strong></td></tr>
+    </tbody>
+  </table>
+  <p><strong>套餐和按量计费，差的是一个数量级。</strong>我此前用 Kimi Code 走按量计费，稍大的任务一段输出就要花掉大几十甚至上百元；换成套餐后，一个月几百元量级的套餐能撑几百个任务。套餐所含额度远超同等用量的按量计费，所以在我看来，尽量在套餐内把问题解决掉、不退回按量计费，本身就是"Token 自由"的核心。</p>
+  <div class="box warn"><span class="t">时效提醒（重要）</span>上述 2.5 折活动 2026 年 11 月 8 日截止，你看到这份手册时活动可能已经结束。下单前请先打开官方链接确认当期价格与规则；活动结束后也可以按原价或新活动订阅，本手册的配置方法不受价格变化影响。</div>
+  <div class="box gold"><span class="t">怎么选档位</span>日常咨询、文书起草、一般问题研究，<strong>Lite 就够，先从单账号开始</strong>；经常处理整卷梳理、批量文书、长时间连续任务的，再上 Pro。多数人用不到 1.5 的多账号代理，别一上来就把架构搞复杂。</div>
+
+  <h3>1.2 为什么大工程需要"滚动接力"：怕的不是花钱，是中断</h3>
+  <p>多账号滚动的真正价值不在多薅额度，而在保住大工程的连续性：</p>
+  <ul>
+    <li>整卷梳理、批量文书、长链条问题研究这类任务，往往要模型连续高强度运转一两个小时甚至更久；</li>
+    <li>单账号中途一旦触顶限流，任务被迫停下，而 AI 的上下文和半成品状态往往没法原样恢复。重新跑一遍，已经花掉的 Token 就得再烧一次，前面的钱等于白花；</li>
+    <li>本地代理能在一个 Key 冷却时无感切到下一个，让任务一次跑完、不中断、不返工。说白了，就是用几个套餐的确定性月费，换掉按量计费的不确定账单，以及中断重来的隐性损耗。</li>
+  </ul>
+
+  <h3>1.3 合规边界：动手前必须读完 <span class="badge must">重要</span></h3>
+  <div class="box warn">
+    <span class="t">官方"特别说明"原文（摘录自上述活动页）</span>
+    ① 多个账户通过同一手机号、同一证件号、同一账号 ID，或经排查为同一实际控制人的，<strong>均视为"同一用户"</strong>；<br>
+    ② 对<strong>恶意抢占活动资源、批量刷单及其他任何采用非常规手段影响活动公平性、违反服务协议及规则的行为</strong>，火山引擎有权取消用户活动资格、回收奖励包资源，必要时追究法律责任。
+  </div>
+  <p>这意味着，用多个账号滚动承接大工程，客观上处在活动规则的灰色地带，会不会被认定为"非常规手段"，解释权在平台。我给自己定了三条原则，也建议你照着把握：</p>
+  <ul>
+    <li><strong>优先单账号</strong>：日常工作一个账号够用，就不要为了摊薄而刻意多开；</li>
+    <li><strong>实名、自用、不转卖</strong>：账号均为本人实名、只服务自己的真实业务，不组织、不分享、不替他人代购优惠名额；</li>
+    <li><strong>以平台最新规则为准</strong>：活动 11 月 8 日截止，规则可能调整；购买前再读一遍当时的活动页与服务协议，判断风险后自行决定。</li>
+  </ul>
+  <div class="box note"><span class="t">一个尚未验证的设想（仅供研究，勿照做）</span>我自己也没有测试过：能否购买多个 Kimi 会员并绑定到同一个 Kimi Code CLI 使用。不同产品的账号体系和协议各不相同，在验证合规性之前，本手册不给任何操作指引。</div>
+
+  <h3>1.4 人人版：单账号直连配置 <span class="badge easy">推荐起点</span></h3>
+  <p>一个套餐账号，把官方接口地址和密钥写进 <code class="inline">opencode.json</code> 即可。模板里只有三处需要你替换，我用注释标了出来；拿不准具体接口路径和模型名，直接把这段配置发给 AI 助手、附上你的套餐开通页，让它帮你填：</p>
+<pre>{
+  "$schema": "https://opencode.ai/config.json",
+  "model": "myprovider/在这里填模型名",
+  "provider": {
+    "myprovider": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "我的套餐",
+      "options": {
+        "baseURL": "在这里填套餐控制台给出的接口地址（baseURL）",
+        "apiKey": "ark_在这里填你自己的密钥"
+      }
+    }
+  }
+}</pre>
+  <div class="box note"><span class="t">三个值从哪来</span>① <strong>baseURL 和模型名</strong>：登录套餐控制台，在"接口接入 / API 调用"类页面复制，不同厂商路径不同，以控制台为准；② <strong>apiKey</strong>：在控制台的密钥管理页新建，只在创建时显示完整内容，先存到本机密码管理器或单独的本机文件；③ 保存后在 opencode 里发一句"你好"验证，通了再往下走。</div>
+  <div class="box tip"><span class="t">省钱的四个使用习惯（往往比多买账号更管用）</span>
+    ① <strong>聚合调用</strong>：同页、同批材料一次处理，代替逐条重复上传，调用量常降一个数量级；<br>
+    ② <strong>本地优先</strong>：OCR、关键词检索、小模型判定放本机，只把需要强推理的环节上云；<br>
+    ③ <strong>结构化输入</strong>：长材料先转成干净的 Markdown、去掉封面目录等冗余再喂；<br>
+    ④ <strong>断点续跑</strong>：用台账驱动，已完成的步骤自动跳过，不重复消耗。
+  </div>
+
+  <h3>1.5 进阶版：多账号自动滚动的本地代理 <span class="badge pro">仅大工程 · 先读 1.3</span></h3>
+  <p>适用场景仅限 1.2 所说的"大工程不能停"，且你已读完 1.3 并愿意自担合规风险。原理：AI 助手只连你本机一个地址 <code class="inline">http://127.0.0.1:18234</code>，由本地代理在多个官方 Key 之间自动故障转移：某个 Key 限流或进入额度冷却，请求会无感切到下一个，活儿不停。</p>
+  <div class="flow">
+    <div class="row">
+      <div class="node">opencode<small>你的 AI 助手</small></div>
+      <span class="arr">→</span>
+      <div class="node g">本地代理 18234<small>server.py · 只在本机</small></div>
+      <span class="arr">→</span>
+      <div class="node">Key A / B / C<small>keys.json · 自动切换</small></div>
+      <span class="arr">→</span>
+      <div class="node">官方接口<small>ark.cn-beijing.volces.com</small></div>
+    </div>
+    <div class="alt">冷却规则：限流 1 分钟　·　欠费/额度 10 分钟　·　网络抖动 30 秒　·　其他 5xx 5 分钟，冷却后自动复活</div>
+  </div>
+
+  <h4>① 代理脚本 server.py（纯 Python 标准库，无需安装任何第三方包）</h4>
+  <p>新建文件夹 <code class="inline">ark-proxy</code>，把下面内容保存为 <code class="inline">server.py</code>：</p>
+<pre># -*- coding: utf-8 -*-
+"""
+Ark API Key 故障转移代理（纯标准库，无第三方依赖）
+监听 127.0.0.1:18234，按 keys.json 中的顺序依次使用 Key；
+某个 Key 返回 401/403/429/5xx 时自动切换下一个，冷却后自动复活。
+修改 keys.json 后 30 秒内自动生效，无需重启。
+"""
+import http.server, http.client, json, os, threading, time
+from datetime import datetime
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+KEYS_FILE = os.path.join(BASE_DIR, 'keys.json')
+LOG_FILE = os.path.join(BASE_DIR, 'proxy.log')
+UPSTREAM_HOST = 'ark.cn-beijing.volces.com'
+PORT = 18234
+LOCK = threading.Lock()
+STATE = {'keys': [], 'dead_until': {}}
+FAILOVER_STATUS = {401, 403, 429, 500, 502, 503, 504}
+RATE_WORDS = ('rpm', 'tpm', 'rate limit', 'ratelimit', 'too many requests',
+              'requests per', 'exceeded', '并发', '频率', '限速')
+QUOTA_WORDS = ('quota', 'insufficient', 'arrears', '欠费', '余额', '额度', '套餐')
+
+
+def log(msg):
+    line = f'[{datetime.now():%Y-%m-%d %H:%M:%S}] {msg}'
+    print(line, flush=True)
+    try:
+        with open(LOG_FILE, 'a', encoding='utf-8') as f:
+            f.write(line + '\n')
+    except Exception:
+        pass
+
+
+def load_keys():
+    try:
+        with open(KEYS_FILE, 'r', encoding='utf-8') as f:
+            cfg = json.load(f)
+        keys = [k for k in cfg.get('keys', [])
+                if isinstance(k, str) and k.startswith('ark-')]
+        with LOCK:
+            STATE['keys'] = keys
+    except Exception as e:
+        log(f'keys.json 读取失败: {e}')
+
+
+def reload_loop():
+    load_keys()
+    t = threading.Timer(30, reload_loop); t.daemon = True; t.start()
+
+
+def mask(key):
+    return '...' + key[-8:]
+
+
+def live_keys():
+    now = time.time()
+    with LOCK:
+        return [k for k in STATE['keys'] if STATE['dead_until'].get(k, 0) <= now]
+
+
+def mark_dead(key, status, text=''):
+    t = (text or '').lower()
+    if any(w in t for w in RATE_WORDS):
+        cooldown = 60
+    elif any(w in t for w in QUOTA_WORDS):
+        cooldown = 600
+    elif status == 0:
+        cooldown = 30
+    else:
+        cooldown = 300
+    with LOCK:
+        STATE['dead_until'][key] = time.time() + cooldown
+    log(f'Key {mask(key)} 暂时下线 {cooldown // 60} 分钟 (status={status})')
+
+
+def upstream_request(handler, key, body):
+    conn = http.client.HTTPSConnection(UPSTREAM_HOST, timeout=300)
+    skip = ('host', 'authorization', 'content-length', 'connection',
+            'accept-encoding', 'proxy-connection', 'keep-alive')
+    headers = {k: v for k, v in handler.headers.items() if k.lower() not in skip}
+    headers['Authorization'] = 'Bearer ' + key
+    conn.request(handler.command, handler.path, body=body, headers=headers)
+    return conn, conn.getresponse()
+
+
+class ProxyHandler(http.server.BaseHTTPRequestHandler):
+    protocol_version = 'HTTP/1.1'
+
+    def log_message(self, fmt, *args):
+        pass
+
+    def _respond(self, status, payload, ctype='application/json; charset=utf-8'):
+        body = payload if isinstance(payload, bytes) else payload.encode('utf-8')
+        try:
+            self.send_response(status)
+            self.send_header('Content-Type', ctype)
+            self.send_header('Content-Length', str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+        except Exception:
+            pass
+
+    def _handle(self):
+        if self.path == '/healthz':
+            payload = f'ok | live keys: {len(live_keys())}/{len(STATE["keys"])}'
+            self._respond(200, payload, 'text/plain; charset=utf-8')
+            return
+        try:
+            length = int(self.headers.get('Content-Length') or 0)
+            body = self.rfile.read(length) if length else None
+        except Exception:
+            self._respond(400, json.dumps({'error': {'message': 'bad request'}}))
+            return
+        with LOCK:
+            all_keys = list(STATE['keys'])
+        self._attempt(0, body, all_keys)
+
+    def _is_dead(self, key):
+        with LOCK:
+            return STATE['dead_until'].get(key, 0) > time.time()
+
+    def _attempt(self, idx, body, all_keys):
+        while idx < len(all_keys) and self._is_dead(all_keys[idx]):
+            idx += 1
+        if idx >= len(all_keys):
+            log(f'所有 Key 均不可用: {self.command} {self.path}')
+            self._respond(503, json.dumps(
+                {'error': {'message': 'All API keys unavailable or quota exhausted.'}}))
+            return
+        key = all_keys[idx]
+        started = time.time()
+        try:
+            conn, resp = upstream_request(self, key, body)
+        except Exception as e:
+            log(f'Key {mask(key)} 网络错误: {e}，切换下一个')
+            mark_dead(key, 0)
+            return self._attempt(idx + 1, body, all_keys)
+        status = resp.status
+        if status in FAILOVER_STATUS:
+            text = resp.read().decode('utf-8', 'ignore')
+            conn.close()
+            log(f'Key {mask(key)} 返回 {status}，切换下一个 Key | 响应: {text[:150]}')
+            mark_dead(key, status, text)
+            return self._attempt(idx + 1, body, all_keys)
+        log(f'Key {mask(key)} {self.command} {self.path} -> {status} ({time.time()-started:.1f}s)')
+        try:
+            self.send_response(status)
+            skip = ('transfer-encoding', 'connection', 'content-length',
+                    'content-encoding', 'keep-alive')
+            for k, v in resp.getheaders():
+                if k.lower() not in skip:
+                    self.send_header(k, v)
+            self.send_header('Transfer-Encoding', 'chunked')
+            self.end_headers()
+            while True:
+                chunk = resp.read(65536)
+                if not chunk:
+                    break
+                self.wfile.write(f'{len(chunk):x}\r\n'.encode('ascii') + chunk + b'\r\n')
+                self.wfile.flush()
+            self.wfile.write(b'0\r\n\r\n')
+            self.wfile.flush()
+        except (BrokenPipeError, ConnectionResetError):
+            log('客户端中断连接')
+        except Exception as e:
+            log(f'响应转发出错: {e}')
+        finally:
+            conn.close()
+
+    def _safe_handle(self):
+        try:
+            self._handle()
+        except Exception as e:
+            log(f'处理请求出错: {e}')
+            try:
+                self._respond(502, json.dumps({'error': {'message': 'proxy internal error: ' + str(e)}}))
+            except Exception:
+                pass
+
+    do_GET = _safe_handle
+    do_POST = _safe_handle
+    do_PUT = _safe_handle
+    do_DELETE = _safe_handle
+
+
+def main():
+    load_keys()
+    if not STATE['keys']:
+        log('keys.json 中没有可用 Key，退出')
+        raise SystemExit(1)
+    reload_loop()
+    server = http.server.ThreadingHTTPServer(('127.0.0.1', PORT), ProxyHandler)
+    server.daemon_threads = True
+    log(f'Ark 故障转移代理已启动: http://127.0.0.1:{PORT} -> '
+        f'https://{UPSTREAM_HOST} (Keys: {len(STATE["keys"])})')
+    try:
+        server.serve_forever()
+    except KeyboardInterrupt:
+        log('代理已停止')
+
+
+if __name__ == '__main__':
+    main()</pre>
+
+  <h4>② 密钥文件 keys.json（只存本机，切勿外传或提交到任何仓库）</h4>
+<pre>{ "keys": [ "ark_你的KEY_A", "ark_你的KEY_B", "ark_你的KEY_C" ] }</pre>
+
+  <h4>③ 启动脚本 start.bat（双击即可运行；Python 路径换成你本机的）</h4>
+<pre>@echo off
+cd /d "%~dp0"
+python server.py
+pause</pre>
+
+  <h4>④ opencode.json 改为指向本地代理</h4>
+<pre>{
+  "$schema": "https://opencode.ai/config.json",
+  "model": "myprovider/你的模型名",
+  "provider": {
+    "myprovider": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "本地故障转移代理",
+      "options": {
+        "baseURL": "http://127.0.0.1:18234/api/coding/v3",
+        "apiKey": "local-proxy"
+      }
+    }
+  }
+}</pre>
+  <div class="box tip"><span class="t">验证是否生效</span>代理运行后，浏览器访问 <code class="inline">http://127.0.0.1:18234/healthz</code>，看到 <code class="inline">ok | live keys: 3/3</code> 即正常；打开同目录 <code class="inline">proxy.log</code> 可看到每个 Key 的调用与切换记录（日志只显示后 8 位）。新增 Key 只需编辑 keys.json，30 秒内热生效。</div>
+  <div class="box warn"><span class="t">合规与安全（务必结合 1.3 阅读）</span>本机制的正当用途是"大工程额度接力、避免中断重跑"，<strong>不是规避限额、更不是抢占活动资源</strong>；多账号持有与使用以平台服务协议、实名要求和 1.3 所引"特别说明"为准，风险与后果由使用者自行承担。Key 不提交公开仓库、不进聊天截图、日志只留后 8 位。</div>
+</section>
+
+<!-- ================= 第二章 ================= -->
+<section class="ch" id="ch2">
+  <h2><span class="no">02</span>查得准：给 AI 接上权威法规案例库</h2>
+  <p>模型凭记忆引用法条、案号，是法律场景里最要命的幻觉。我的办法是不给它"凭记忆"的机会：通过 MCP（可以理解成给 AI 插一个专业资料库）接上权威数据库，法规、案例都实时取自源头。下面以我在用的元典为例，其他同类法律数据库的接法相通。</p>
+
+  <h3>2.1 在 opencode.json 中接入（密钥为占位符）</h3>
+<pre>{
+  "mcp": {
+    "yuandian": {
+      "type": "remote",
+      "url": "https://open.chineselaw.com/mcp",
+      "headers": {
+        "Authorization": "Bearer sk_你的KEY_A",
+        "Accept": "application/json, text/event-stream"
+      }
+    },
+    "yuandian-key2": {
+      "type": "remote",
+      "enabled": true,
+      "url": "https://open.chineselaw.com/mcp",
+      "headers": {
+        "Authorization": "Bearer sk_你的KEY_B",
+        "Accept": "application/json, text/event-stream"
+      }
+    }
+  }
+}</pre>
+
+  <h3>2.2 多账号积分的"降级路由规则"，本身就是一份可复用技能</h3>
+  <p>多个积分账号不是乱打，而是按优先级路由、避免重复扣费。把下面这份规则存成项目里的 <code class="inline">AGENTS.md</code>（opencode 会自动读取遵守），账号名和余额换成你自己的：</p>
+<pre># 专业数据库 MCP 密钥使用规则
+
+已配置 N 个指向同一服务的 MCP server，每个使用不同 API 密钥。
+
+## 账号与优先级（按实测余额填写）
+| server 名称 | 密钥末段 | 余额 | 优先级 |
+|-------------|----------|------|--------|
+| yuandian    | ...xxxx  | 3500 | 1（最高） |
+| yuandian-2  | ...yyyy  | 527  | 2 |
+| yuandian-3  | ...zzzz  | 0    | 3（最后） |
+
+## 使用规则
+1. 默认按优先级使用：优先调用优先级 1 的账号；
+2. 每次开始付费任务前，如距上次查询超过 10 分钟或不确定余额，
+   先对当前将使用的账号调用一次 get_user_balance（不扣积分）确认；
+3. 出现余额不足、欠费、额度耗尽、401/403 失效等情况，降级到下一优先级，
+   余额为 0 的账号仅用于明确免费的功能；
+4. 不要并行对多个账号发起同一个付费请求（会重复扣积分），
+   只在一个账号失败后再切换；
+5. 充值或新增密钥后，同步更新本文件与 opencode.json。</pre>
+
+  <h3>2.3 人工终审的底线不让</h3>
+  <ul>
+    <li>本地汇编读上下文，数据库做实时核验，<strong>两条来源对一遍</strong>；</li>
+    <li><strong>检索到 ≠ 核验过</strong>：引用前一律回到法规/裁判文书原文，由本人终审；</li>
+    <li>拿不准的一律标"待核"，宁缺毋造。</li>
+  </ul>
+</section>
+
+<!-- ================= 第三章 ================= -->
+<section class="ch" id="ch3">
+  <h2><span class="no">03</span>读得进：让 AI 真正"读透"材料</h2>
+  <div class="box gold"><span class="t">这一章先立一个认知</span>AI 读不读得懂，一半取决于你喂给它的东西是不是"可读的"。扫描件、拍照卷宗直接丢进去，它常常只看个文件名和目录，就开始一本正经地猜。所以分两步走：先把材料变成它能读的文本，再让它分批读透、留痕验收。</div>
+
+  <h3>3.1 先判断材料"看得到字"吗</h3>
+  <ul>
+    <li>用鼠标在 PDF 里试着选中一段文字：选不中、或选出乱码，就是图片型文件，<strong>必须先 OCR</strong>；</li>
+    <li>带表格、印章、手写批注、多栏排版的，普通复制会乱序，要用能保留版式的解析工具。</li>
+  </ul>
+
+  <h3>3.2 按材料类型选工具</h3>
+  <table>
+    <thead><tr><th>材料类型</th><th>处理方式</th><th>输出 / 说明</th></tr></thead>
+    <tbody>
+      <tr><td>文字版 PDF、Word、网页</td><td>直接转 Markdown</td><td>保留标题层级，去掉封面目录冗余</td></tr>
+      <tr><td>扫描件 / 拍照卷宗 / 图片型 PDF</td><td><strong>MinerU</strong>（在线版或本地版）、TextIn 等 OCR</td><td>输出带页码的 Markdown，版面表格尽量还原</td></tr>
+      <tr><td>复杂排版、多栏、大量表格</td><td>MinerU（版面分析 + 表格识别）</td><td>表格转 Markdown 表，可输出坐标回查原页</td></tr>
+      <tr><td>Excel / 台账</td><td>另存 CSV，先让 AI 核对行列含义</td><td>必要时先出"字段理解表"再分析</td></tr>
+      <tr><td>录音 / 录像</td><td>先用转写工具出带时间戳的文字稿</td><td>结论可回指音频时间位置</td></tr>
+      <tr><td>涉密 / 客户敏感卷宗</td><td><strong>一律走本地方案，断网处理</strong></td><td>数据不出本机</td></tr>
+    </tbody>
+  </table>
+
+  <h3>3.3 零门槛：MinerU 在线版五步走（仅限非涉密材料）<span class="badge easy">免安装</span></h3>
+  <ol>
+    <li>打开 MinerU 在线解析官方网页，注册登录；</li>
+    <li>上传 PDF 或图片，表格公式多的勾选"公式/表格识别"；</li>
+    <li>解析完成后<strong>下载 Markdown</strong>（含全文 .md 与图片资源）；</li>
+    <li>抽查：头、中、尾各抽 1–2 页对原件，看漏页、串行、表格错位，确认<strong>原始页码</strong>还在；</li>
+    <li>把 .md 和配套图片放同一文件夹，把<strong>文件路径</strong>交给 AI 读，而不是把全文贴进对话框。</li>
+  </ol>
+
+  <h3>3.4 涉密材料：本地 OCR，让卷宗不出本机 <span class="badge must">红线</span></h3>
+  <p>本地 MinerU（开源，命令行批量解析）或 PaddleOCR（纯文字扫描件更亲民）全程断网运行。不会装就把这段话发给 AI 编程助手：</p>
+<pre>我的电脑是 Windows，我要在本机、不联网处理涉密 PDF：
+1. 帮我安装可本地运行的 MinerU（或你更推荐的本地 PDF 解析/OCR 工具），
+   优先最简单、不容易出错的安装方式，每一步要执行的命令写给我；
+2. 需要我确认的地方提前告诉我选什么；
+3. 装好后教我用一条命令把某文件夹里的全部 PDF 批量转成 Markdown，
+   输出到另一个文件夹，并保留原始页码；
+4.    再给我一个抽查清单，确认没有漏页、乱码、表格错位；
+5. 全程不要让我把任何文件上传到网站。</pre>
+
+  <h3>3.5 刑事卷宗为什么不能直接"上云"：合规边界与脱敏路线 <span class="badge must">重点</span></h3>
+  <p>先纠正一个常见误会。很多人以为网页对话框上传才叫上云，在本地跑命令行（CLI）就算本地处理，其实不是：无论哪种形态，大模型都在厂商的云端服务器上，你的输入要打包发过去、处理完再传回来。不少大模型的用户协议还约定，上传内容可能被用于模型改进和训练。所以"我用的是本地工具"，并不等于"数据没出门"。</p>
+  <p>刑事卷宗是<strong>敏感个人信息的高度集合体</strong>，这里有明确的法律边界（以下条文已经权威库核验为现行有效）：</p>
+  <ul>
+    <li><strong>《个人信息保护法》第二十八条</strong>：特定身份、行踪轨迹等属于敏感个人信息，只有在具有特定目的、充分必要并采取严格保护措施时方可处理；</li>
+    <li><strong>《数据安全法》第二十一条</strong>：国家建立数据分类分级保护制度，按数据一旦泄露对国家安全、公共利益及个人组织合法权益的危害程度分级重点保护，案卷数据正属于应重点保护的一档；</li>
+    <li>若使用<strong>境外大模型</strong>，还叠加数据出境问题，上述保护红线更难保障。</li>
+  </ul>
+  <div class="box gold"><span class="t">可行路线：本机脱敏 → 代号上云 → 本机还原</span>
+    在本机把真实信息全部置换为唯一代号（人名、地名、机关、身份证号各有编码规则，避开 0/O、1/I 等易混字符），"真实信息 ↔ 代号"词典是钥匙、只存本机；云端只看到代号、不影响推理；拿到成果后回本机一键还原。<strong>脱敏这件事 100 分才算及格，99% 的准确率就意味着 1% 的信息在裸奔</strong>，词典生成后必须人工核对。
+  </div>
+  <p><strong>一个要如实说明的硬件现实。</strong>脱敏本身也要用模型：身份证、手机号、案号这类格式固定的信息，正则就能精准抓取；但人名、地名、机构名属于开放类别，纯正则误报率很高，需要本地大模型（如 Ollama + 7B/8B 量化模型）结合上下文判断。而本地大模型吃显卡、吃显存，<strong>普通办公笔记本通常带不动案卷级别的脱敏转化，需要提高机器配置</strong>。受限于本次主题，具体的硬件配置与工具选型这里不展开，仅提示这条门槛真实存在；涉密场景请优先走全本地、断网方案，或先完成可靠脱敏再上云。</p>
+  <div class="box note"><span class="t">延伸阅读</span>我把这套做法的完整复盘写成了一篇文章，包括离线脱敏工具的两版迭代、本地 NER 与本地大模型的方案对比、脱敏词典审计，见公众号《AI 很好用，但律师的案卷不能给它看》：<a href="https://mp.weixin.qq.com/s/-eCPF502Hm-BcXHtQryspw" target="_blank" rel="noopener">微信原文链接</a>。第四章辩护 Skill 的"第 0 步数据合规前置"，和这里是同一套要求。</div>
+
+  <h3>3.6 解析质量验收 + 材料台账</h3>
+  <ul>
+    <li>抽页核对：头中尾各 1–2 页对原件；页码必须连续、可回指；</li>
+    <li>一个案件一个文件夹，文件统一编号（如 <code class="inline">03_一审判决书_p12-30.md</code>）；</li>
+    <li>建台账：文件名 / 类型 / 原页数 / 是否已解析 / 备注，后续"已读 x/y"对着它数。</li>
+  </ul>
+
+  <h3>3.7 深读四把锁（配合第五章铁律使用）</h3>
+  <ol>
+    <li><strong>读做分离</strong>：阶段一只读不写、逐份列要点，确认无遗漏后才进入阶段二分析成稿；</li>
+    <li><strong>分批读透，不抽样</strong>：按台账分批，每批同等深读，禁止"代表性阅读"、跳页、看目录猜；</li>
+    <li><strong>读完复述</strong>：每批读完先合上材料复述关键信息，复述不出就回炉重读该批；</li>
+    <li><strong>结论带出处 + 进度锚点</strong>：每条结论标注"文件名 + 页码/段落"，指不回出处的一律删除；每轮报已读 x/y，要点写进进度文件，关机换天无损接续。</li>
+  </ol>
+
+  <h3>3.8 三段可直接照抄的提示词</h3>
+  <h4>① 开工前 · 立阅读规矩</h4>
+<pre>本任务材料较多，严格遵守：
+1. 先按材料台账逐份完整阅读，禁止只读目录、标题、文件名就下结论，禁止抽样；
+2. 分两阶段：阶段一只读并输出每份材料的要点（当事人/时间/金额/主张/证据/矛盾点），
+   我确认无遗漏后，才进入阶段二分析；
+3. 每读完一批，先用自己的话复述，经我确认再继续；
+4. 每条结论必须标注【文件名 + 页码/段落】，指不出出处的判断一律不输出；
+5. 每轮开头三行：当前在读哪份（已读 x/y）/ 已确认要点 / 下一步；
+6. 扫描件、图片若无法识别文字，立即告诉我"需要先 OCR"，不许假装读过。</pre>
+  <h4>② 分批深读 · 复述与出处</h4>
+<pre>现在只读这一批：【文件清单】。
+要求：
+- 逐页读完，不要跳读；读完先不要分析；
+- 输出：①每份材料 5 条以内核心要点，每条后跟（文件名, 页码）；
+       ②材料之间相互印证或矛盾的地方；
+       ③你没读懂、字迹不清、疑似缺页的位置。
+最后用你自己的话，把这批材料讲一遍（不超过 300 字），等我确认。</pre>
+  <h4>③ 解析后 · 验收 OCR 质量</h4>
+<pre>这是某卷宗 OCR 转出的 Markdown，原件共【N】页。请帮我检查：
+1. 页码是否连续、有无缺页或大段重复；
+2. 表格是否仍可读（行列有没有错位）；
+3. 有无成片乱码、错字、串行；
+4. 列出需要我对照原件人工复核的页码清单。
+在我确认文本质量之前，不要开始分析内容。</pre>
+</section>
+
+<!-- ================= 第四章：演进过程 ================= -->
+<section class="ch" id="ch4">
+  <h2><span class="no">04</span>五级演进：从"读都没读"到"按你的标准交付"</h2>
+  <p>工具不会一上来就好用。同一个 AI、同一本案卷，我手里的成果是沿着五级台阶一级级磨出来的，每一级只解决前一级留下的一个具体毛病。这条链路走完，才敢说一句：我给 AI 的指令是明确的。</p>
+
+  <div class="level">
+    <div class="hd"><span class="lv">L0</span><h4>原始用法：案卷直接丢给网页版通用 AI</h4></div>
+    <p class="do">把扫描件、Word 卷宗一股脑上传，配一句"帮我看看、出个意见"。</p>
+    <div class="res"><b class="bad">毛病：</b>通用 AI 根本不知道该怎么做；更麻烦的是扫描件它读不到字，<b class="bad">很可能只看了文件名和案卷目录，就开始编</b>。产出是一堆"正确的废话"，完全不能用。</div>
+    <span class="map">对症资产 → <a href="#ch3">第三章 3.1–3.4：先判断可读性，再 OCR 转 Markdown</a></span>
+  </div>
+
+  <div class="level">
+    <div class="hd"><span class="lv">L1</span><h4>先解决"看得见"：把案卷变成 AI 读得懂的文本</h4></div>
+    <p class="do">用第三章的办法：扫描件/照片走 OCR，全部转成带页码的 Markdown，再让它按深读规矩逐份读、读完复述、结论带出处。</p>
+    <div class="res"><b class="ok">改善：</b>材料真的被读完了，不再凭文件名瞎猜。<b class="next">还差：</b>它<b class="next">抓不住重点</b>，不知道一份刑事辩护意见该盯哪几个构成要件、证据从哪里塌，结果仍拿不出去。</div>
+    <span class="map">对症资产 → <a href="#ch3">第三章 3.6–3.8：验收台账、深读四把锁、三段照抄提示词</a></span>
+  </div>
+
+  <div class="level">
+    <div class="hd"><span class="lv">L2</span><h4>再解决"看得准"：给它配上专属的专业技能 Skill</h4></div>
+    <p class="do">以涉黑社会性质组织犯罪辩护为例。这类案件的判断框架是法定的<strong>四个特征</strong>：组织特征、经济特征、行为特征、非法控制（危害性）特征。把"围绕四个特征怎么辩"做成一个辩护 Skill，每个特征写清四件事：看什么证据、控方通常怎么证、我方从哪几个点反制、要找哪些法规和司法解释。做这个 Skill 的素材，就是你平时攒下的法规、司法解释、权威案例和别人写的好文章（把文件路径给 AI 让它读透、沉淀）。</p>
+    <div class="res"><b class="ok">改善：</b>通用 AI 装上这个框架后，<b class="ok">开始能抓住重点、围绕争点分析</b>，不再泛泛而谈。<b class="next">还差：</b>分析对路了，但写出来的东西不像"你的"，表述、结构、格式都不对，仍然不能直接交付。</div>
+    <span class="map">对症资产 → 本章 4.2：涉黑辩护 Skill 完整模板，换要件即可复用到别的罪名；法条核验见 <a href="#ch2">第二章</a></span>
+  </div>
+
+  <div class="level">
+    <div class="hd"><span class="lv">L3</span><h4>再解决"出得好"：配上表述、格式与复核技能</h4></div>
+    <p class="do">它已经能读全、知道重点，缺的是"按你想要的标准输出"。于是再加三类技能：<strong>表述 Skill</strong>（你的行文风格、法言法语口径）、<strong>格式 Skill</strong>（法律文书的固定结构、标题层级、落款排版）、<strong>复核验证 Skill</strong>（交付前逐条核对：法条案号回原文、数字期限重算、结论是否都有出处，拿不准标"待核"）。</p>
+    <div class="res"><b class="ok">改善：</b>产出从"能用的草稿"逼近"可交付的成品"，质量稳定、风格统一。</div>
+    <span class="map">对症资产 → <a href="#ch5">第五章《质量优先》铁律（含三行头汇报、零返工门禁）与 <a href="#ch7">第七章专业终审线</a></span>
+  </div>
+
+  <div class="level peak">
+    <div class="hd"><span class="lv">L4</span><h4>继续往下拆：拆到指令足够明确为止</h4></div>
+    <p class="do">这条链路没有终点。任何一个环节还不满意，就把它再拆细：一个大技能拆成几个小技能，一个模糊要求拆成可验收的几步。判断"够好了"的标准只有一个：</p>
+    <div class="res"><b class="ok">读什么、按什么框架分析、用什么口径和格式输出、交付前由谁按什么清单复核，每一环都明确、可照做、可核验。这时才可以说，我给 AI 下达的指令是明确的。</b></div>
+    <span class="map">落地方式 → 每办完一个同类案件就往 Skill 里补料；新需求怎么让 AI 替你搭，见 <a href="#ch6">第六章四段式模板</a></span>
+  </div>
+
+  <h3>4.1 一张图看懂技能组装栈</h3>
+  <div class="stack">
+    <div class="layer l-check"><span class="lt">复核验证层</span><span class="ld">复核 Skill：出处核验、数字重算、待核标注、质量门禁（配合第五章铁律）</span></div>
+    <div class="layer l-out"><span class="lt">输出表达层</span><span class="ld">表述 Skill（你的风格口径）＋ 格式 Skill（文书结构与排版）</span></div>
+    <div class="layer l-pro"><span class="lt">专业判断层</span><span class="ld">罪名/案由 Skill：要件框架、控方命题、反制点、法源清单（如涉黑四特征）</span></div>
+    <div class="layer l-base"><span class="lt">材料基础层</span><span class="ld">OCR + Markdown + 深读四把锁（第三章），保证它真的把案卷读全</span></div>
+  </div>
+  <p>越往下越是地基，越往上越是"你的味道"。通用模型人人一样，<strong>真正拉开差距的是上面三层你自己沉淀的技能</strong>。</p>
+
+  <h3>4.2 可直接复制：涉黑涉恶刑事辩护 Skill v3（资深刑辩经验结晶版）</h3>
+  <p>下面是可直接保存为 <code class="inline">defense-gang-crime.md</code> 的完整技能 v3，共 17 节。v1 立起四特征框架，v2 补齐降级/量刑/个罪/SOP 完整辩护链，v3 再补上<strong>只能靠办案积累的隐性经验</strong>：涉黑特殊程序（会见误区、37 天救援、排非、分案）、反有组织犯罪法财产条款逐条打法、控方七类指控套路反制、八类文书骨架与律师执业风险红线；其中程序与财产规则均经权威库核验为现行有效，数额等地方标准以案发地正式文件为准。</p>
+<pre id="skillSource"># 涉黑涉恶刑事辩护 Skill v3 · 资深刑辩经验结晶版（可直接保存为 defense-gang-crime.md）
+
+## 第 0 步 · 数据合规前置（任何分析之前必须满足）
+- 刑事案卷是敏感个人信息的高度集合体，禁止把原文（真实人名、身份证号、住址、
+  案情、证据）直接上传云端 AI；
+- 必须先在本机完成脱敏：真实信息→唯一代号，代号避开易混字符（0/O、1/I），
+  "真实信息↔代号"词典只存本机、单独保管；云端只见代号，成果回本机再还原；
+- 本 Skill 内一律使用代号（如【人员A】【地点甲】【公司①】），不得索取真实身份信息；
+- 脱敏 100 分才算及格，99% 的准确率意味着 1% 的信息在裸奔；词典生成后先人工核对再用。
+
+## 一、角色定位、三级辩护目标与策略辩证法
+你是一名只办涉黑涉恶案件的资深刑事辩护助手，只在本 Skill 框架内工作。禁止用
+"初犯偶犯、主观恶性小、认罪态度好、家庭困难"之类空泛套路替代实质分析；所有判断
+必须落到卷宗页码、法源条文或可验证的经验规则上。
+### 1.1 三级辩护目标（接到任务先定位，不要只会做无罪辩护）
+- 第一目标（无罪/不按黑社会处理）：四特征是【并列要件、同时具备】，实质打掉任一
+  特征，组织、领导、参加黑社会性质组织罪即不成立；
+- 第二目标（阶梯降级，实战命中率最高）：打不掉黑社会时，争取降为恶势力犯罪集团/
+  恶势力团伙，再降为普通犯罪集团或一般共同犯罪，罪名数量、法定刑档、财产刑同步下降；
+- 第三目标（量刑与财产之辩）：定罪难免时，争取角色由组织者→积极参加者→其他参加者
+  下移，叠加从犯/胁从/自首/立功/认罪认罚/退赃，阻击不当数罪并罚与"一刀切"没收。
+### 1.2 资深律师的四条策略辩证法（决定辩护"成不成立"，而非"漂不漂亮"）
+- 大局优先于枝节：先解决"是不是黑社会、是哪一档"的定性问题，再纠缠个案细节；
+  定性降一档，全案刑期与财产刑整体下移，远胜打赢一两个个罪；
+- 同案必须分辩：多名当事人利益相互冲突时（组织者与参加者、指认者与被指认者），
+  各自的角色、情节、证据要切割论证，切忌一份辩护意见"打包处理"；
+- 可接受的妥协：涉黑案全案无罪率极低，对证据确实的当事人，适度认罪认罚换取定性
+  降级与量刑从宽，往往比硬抗到底更符合当事人利益，但认罪认罚只认事实、不认"黑社会"
+  定性帽子，定性辩护独立保留；
+- 程序之辩与实体之辩并行：排非、管辖、并案、会见、羁押等程序问题既是独立辩点，
+  也能反向动摇控方证据体系，不要等开庭才想起来。
+### 1.3 工作总思路
+先评分定位（见第十一节）确定主攻目标，再按"程序排非→定性攻防→阶梯降级→
+个罪拆解→量刑财产"的顺序组织，每条结论都要能回指【代号文件名+页码】或具体法条；
+拿不准的一律进《待核实清单》，宁缺毋造。
+
+## 二、罪名谱系、法定刑与"从严/从宽"规则地图（条号、施行日期引用前回权威库核验）
+### 2.1 刑法第294条涉黑三罪
+- 组织、领导、参加黑社会性质组织罪；入境发展黑社会组织罪；包庇、纵容黑社会性质组织罪；
+- 参加者法定刑分两档：积极参加 3–7 年可并处罚金或没收财产；其他参加 3 年以下
+  （有期徒刑、拘役、管制或剥夺政治权利）可并处罚金；组织者、领导者 7 年以上并处没收财产；
+- 第294条第4款：犯前三款罪又有其他犯罪行为的数罪并罚——辩护重点是审查有无同一行为
+  重复评价、为凑"黑社会"而人为拆分或堆砌罪名（一个行为只能评价一次，是底层法理）。
+### 2.2 恶势力的法律性质（最容易被误讲的一点）
+- 恶势力、恶势力犯罪集团都不是独立罪名，只是共同犯罪的形态/量刑评价，规定于两高两部
+  2019《关于办理恶势力刑事案件若干问题的意见》；认定后果是"从重处罚"，不另定罪名、
+  不产生没收财产的当然适用，这是降级辩护的价值所在。
+### 2.3 反有组织犯罪法（2022-05-01 施行）的从严与从宽地图
+- 第22条：对组织者、领导者、骨干成员严格掌握取保候审、不起诉、缓刑、减刑、假释、
+  暂予监外执行，并充分适用财产刑——注意对象不含"一般参加者"，为普通成员争取
+  取保、缓刑是法定空间，不要被"涉黑一律从严"吓住；
+- 第33条：积极配合查办、提供组织结构/重大犯罪/保护伞线索、协助追缴赃款的可从宽，
+  但对组织者、领导者"严格适用"——协助从宽是一般参加者的重要量刑筹码；
+- 第34条：组织者、领导者"应当依法并处没收财产"，其他成员是"可以"并处罚金或没收，
+  财产刑辩护首先争角色、再争"可以≠应当"；
+- 第35、36条：组织者、领导者、恶势力首要分子判 10 年以上的跨省异地执行，减刑假释
+  须省级监狱管理机关复核——当事人和家属最关心的服刑待遇，要提前讲清；
+- 第19条：因组织、领导黑社会性质组织被判刑的，刑满后设区市以上公安可决定其
+  5 年内报告个人财产及日常活动——属出狱后附随义务，会见时应向当事人释明。
+
+## 三、四特征逐特征攻防（核心。每个特征固定输出四栏：
+##    ①控方命题 ②卷宗证据审查【代号文件+页码】 ③我方反制点 ④待补强）
+
+### 特征一 · 组织特征
+法定表述：形成较稳定的犯罪组织，人数较多，有明确的组织者、领导者，骨干成员基本固定。
+- 形成时间与存续：何时形成、是否持续稳定；松散临时纠合、时聚时散→不具备稳定性；
+- 人数与层级：是否确有"人数较多"且层级清晰；受雇佣者、被胁迫者、只提供合法劳务者应剥离；
+- 骨干是否"基本固定"：人员流动频繁、职责不清→骨干不固定；
+- "组织规约"辨伪：是犯罪纪律，还是行业惯例、人情往来、公司正常管理制度；
+- 加入自愿性：被蒙蔽、被胁迫者不应认定为组织成员（衔接胁从犯，刑法第28条）；
+- 待补强：成员名册、到案经过、各被告人供述中关于层级的矛盾点。
+【裁判规则·老手尺度】① 2009 纪要明确"不要被组织形式表象左右"，对人员频繁更替、
+结构松散的，要抓住"骨干是否基本固定"实质判断；② 受雇佣提供合法劳务（司机、会计、
+厨师、普通员工）、被胁迫者、临时帮忙者，实务中普遍不认定为组织成员，应逐人剥离；
+③ 组织形成时间是关键争点：黑社会成立时点之前的违法事实，只能算个罪、不能计入组织犯罪，
+务必让控方明确"组织形成时间"并据此切割事实。
+
+### 特征二 · 经济特征
+法定表述：有组织地通过违法犯罪活动或者其他手段获取经济利益，具有一定的经济实力，
+以支持该组织的活动。
+- 经济来源：是有组织获取，还是个人或合法企业的正常经营所得（合法收入应剥离）；
+- "一定经济实力"：2018 指导意见已否定 20–50 万"一刀切"数额，须结合个案实质判断；
+- 利益去向：收益是否实际用于支持组织活动（养人、作案经费、摆平事端）；
+  用于个人消费、合法经营的部分不能计入；
+- 单位犯罪与组织犯罪的界限：以合法公司为外衣的，争取往单位/个人行为方向切割；
+- 待补强：审计报告、银行流水、纳税记录，核算"涉组织"资金的真实占比。
+【裁判规则·老手尺度】① 经济特征是四特征中最容易被"注水"的：控方常把企业全部营收
+都算作组织经济实力，辩方要算"合法经营占比"这笔账，占比越高越说明是正常市场主体；
+② "支持组织活动"要求资金与组织运行有实质关联，发工资、分红、正常商务接待不等于
+"养黑"，用于组织成员个人及家庭消费的部分应剔除；③ 2018 意见已明确不搞 20–50 万
+数额一刀切，经济实力要结合当地经济水平、行业特点实质判断，可正面援引反驳控方数额主张。
+
+### 特征三 · 行为特征
+法定表述：以暴力、威胁或者其他手段，有组织地多次进行违法犯罪活动，
+为非作恶，欺压、残害群众。
+- 组织性：每起事实是否受组织意志支配、为组织利益实施；个人恩怨、孤立行为应剥离
+  （对照 2018 指导意见列举的五种"应认定为组织犯罪"情形反向排查）；
+- 多次性："多次"指三次以上，但仅违法不犯罪不能升格为黑社会（2009 纪要明确）；
+  剔除已过追诉时效、已受处理、证据不足、本质属民事或治安纠纷的事实；
+- 手段性质：暴力威胁是否真实存在；"软暴力"须同时满足手段性、心理强制性、
+  不法目的、相当性四要件（2019 软暴力意见第1条），正常讨债、商业纠纷不等于软暴力；
+- 个案独立性：具体罪名证据不足的，不能靠"黑社会"标签反向推定成立；
+- 待补强：逐案建立证据清单，区分能认定、存疑、应排除三类事实。
+【裁判规则·老手尺度】① 2009 纪要明确"仅违法不犯罪不能认定黑社会"，要把违法事实
+与犯罪事实分开建账，防止控方用一堆治安案件凑"多次"；② 已过追诉时效、已受治安/行政
+处理、已和解的民事纠纷，一律从计数中剔除；③ 软暴力须同时满足手段性、心理强制性、
+不法目的、相当性四要件（2019 软暴力意见第1条），正常维权、合法债务催收、商业谈判
+不构成软暴力，要逐案比对四要件而不是看"行为难不难看"；④ 网络涉黑看 2019 信息网络
+意见：单纯线上违法且无欺压残害特征的，一般不作为行为特征依据。
+
+### 特征四 · 非法控制（危害性）特征
+法定表述：称霸一方，在一定区域或者行业内，形成非法控制或者重大影响，
+严重破坏经济、社会生活秩序。
+- "一定区域/行业"是否具体可证：空泛的"当地"不成立，须有明确范围；
+- 控制程度：是否达到排除限制他人经营、形成心理强制；正常市场竞争不等于非法控制；
+- 危害性证据：被害人陈述、行业数据、行政机关材料能否支撑"严重破坏秩序"；
+- "保护伞"路径：包庇纵容是否有证据，没有则该路径不成立；
+- 待补强：同业经营者证言、招投标与行业准入材料，证明竞争仍自由、秩序未被破坏。
+【裁判规则·老手尺度】① 这是黑社会与恶势力最核心的分水岭，也是降级辩护的主攻点：
+恶势力只要求"扰乱秩序、影响恶劣"，黑社会要求达到"非法控制或重大影响"，证明标准
+明显更高；② "一定区域/行业"必须具体、可证、有边界，起诉书笼统一句"在当地形成
+重大影响"属于证明不足，应要求控方明确范围并举证；③ 正常市场竞争、行业优胜劣汰、
+个别冲突事件不等于非法控制，可收集招投标记录、行业准入、同业仍在自由经营的证据反证；
+④ 本特征无直接被害人、无行业数据、无行政机关材料支撑的，大胆主张不成立。
+
+## 四、阶梯降级辩护（v2 新增，定不了罪就往低处打）
+按下列区分表逐项比对，找到当事人行为实际落入的最低层级并论证：
+| 层级 | 组织程度 | 人数/稳定性 | 经济特征 | 非法控制 | 法律后果 |
+|------|----------|-------------|----------|----------|----------|
+| 黑社会性质组织 | 四特征同时具备 | 人数较多、骨干固定 | 有组织敛财并支持组织 | 形成非法控制/重大影响 | 第294条重罪+没收财产 |
+| 恶势力犯罪集团 | 三人以上、首要分子明显、重要成员固定 | 多次实施 | 不要求经济特征 | 扰乱秩序、影响恶劣但未达非法控制 | 集团犯罪从重，无294罪名 |
+| 恶势力团伙 | 经常纠集、相对松散 | 一般三人以上 | 不要求 | 造成较恶劣影响 | 一般共同犯罪从重 |
+| 普通共同犯罪/集团 | 无"为非作恶欺压百姓"特征 | 按个案 | 无组织敛财要求 | 无非法控制 | 按具体罪名处罚，不从重 |
+| 个人/单位行为 | 行为与组织意志无关 | —— | 合法经营为主 | —— | 仅个人或单位担责 |
+- 降级论证要点：打掉"非法控制特征"通常即可由黑社会降为恶势力；再打掉"组织稳定性/
+  骨干固定"可降为普通共同犯罪；把具体事实剥离为个人行为则缩小归责范围；
+- 每一档降级都要落到量刑差异（罪名数量、法定刑档、财产刑、缓刑空间），让裁判者看到
+  "降一档少判多少年、少没收多少财产"，而非停留在概念之争。
+
+## 五、涉黑案件特殊程序辩护（v3 新增，普通刑案经验覆盖不到的地方）
+### 7.1 会见权——先破除一个高频误区
+- 《刑事诉讼法》第39条明确，侦查期间会见须经侦查机关许可的只有"危害国家安全犯罪、
+  恐怖活动犯罪"两类，黑社会性质组织犯罪【不在其列】。持三证（执业证、所函、委托书
+  或法援公函）会见，看守所应及时安排、至迟不超过 48 小时，且会见不被监听；
+- 实务中若以"涉黑要审批""专案组不让见"为由拖延，属于违法限制，应依《关于依法保障
+  律师执业权利的规定》第9条提出申诉控告，要求书面答复，不要默认"涉黑见不到"。
+### 7.2 羁押状态攻防（37 天黄金救援期，见第十三节作战表）
+- 公安刑事拘留最长 30 天 + 检察院审查批捕最长 7 天，是争取不批捕的唯一窗口期；
+- 已逮捕的，依《刑事诉讼法》第95条、第97条可申请羁押必要性审查/变更强制措施，
+  办案机关 3 日内须答复；认罪认罚后检察院应及时审查羁押必要性（高检规则第270条）；
+- 反有组织犯罪法第22条对组织者、领导者、骨干从严掌握取保，但一般参加者不在此列，
+  应区分角色积极争取；第30条的异地、分别、单独羁押，须依法通知家属和辩护人，
+  未通知的可提出异议。
+### 7.3 非法证据排除（涉黑案口供是证据体系的支柱，打掉口供等于拆台）
+- 重点核查：同步录音录像是否完整、有无"打时不录录时不打"、疲劳审讯、威胁引诱、
+  超期羁押、指定居所监视居住是否合法适用；
+- 申请排非要在开庭前提出并提供线索材料（时间、地点、人员、方式），争取召开庭前会议；
+  重复性供述的排除规则、换人侦查后告知诉讼权利的例外要一并研究；
+- 涉黑案高度依赖言词证据，供述之间、供述与客观证据之间的矛盾要逐项列表，
+  印证不能形成闭环的事实主张"存疑有利于被告人"。
+### 7.4 技术侦查与电子数据
+- 反有组织犯罪法第31条允许技侦，但须立案后、经严格审批；审查立案时间是否早于技侦
+  启动、审批手续是否齐备、技侦证据是否依法转化；
+- 电子数据审查取证主体、完整性校验值、提取笔录、见证人、原始存储介质，
+  微信记录、审计电子底稿缺失校验链条的可申请排除或重新鉴定。
+### 7.5 管辖、并案与分案
+- 警惕为凑"黑社会"把互不相关的人员、事实不当并案；审查并案是否符合法定牵连关系；
+- 反有组织犯罪法第32条：检举揭发同案人或提供重大线索、同案处理有人身危险的
+  可以分案——对愿意配合的一般参加者，主动争取分案处理、切断与组织者的捆绑；
+- 异地管辖、提级管辖是否有正当理由，是否存在变相指定管辖。
+### 7.6 认罪认罚的特殊打法
+- 认罪认罚具结的是"事实与量刑建议"，不是对"黑社会性质组织"定性的认可，
+  定性辩护独立保留，要在具结笔录和庭审中明确"对事实无异议、对定性有异议"；
+- 审查量刑建议是否把涉黑从严情节重复计算、是否遗漏从宽情节，明显不当的申请调整。
+
+## 六、证据法实战工具箱（v3 新增，老律师质证的底层功夫）
+- 言词证据"印证失灵"攻击法：列出每名被告人供述的前后变化、各被告之间的矛盾点、
+  口供与客观证据（流水、监控、鉴定）的冲突，凡不能相互印证的待证事实一律存疑；
+- 审计/司法会计鉴定质证四问：机构与鉴定人资质、检材是否完整真实、鉴定方法与依据、
+  结论是否超范围（把法律判断写成审计结论的部分无效），必要时申请重新鉴定或鉴定人出庭；
+- 关键证人出庭：对定罪量刑有重大影响的证言存疑的，申请证人、侦查人员、鉴定人出庭，
+  涉黑案证人可依反有组织犯罪法第61条申请保护措施（不公开信息、不暴露外貌声音）；
+- 证据"三性"清单：每份证据按真实性、合法性、关联性逐项过堂，输出可直接用于庭审的
+  质证表，而非笼统说"对三性均有异议"；
+- 举证责任倒置点：涉案财产的来源合法性，在反有组织犯罪法第45条特定情形下由被告人
+  说明，但前提是控方先证明"高度可能属于违法所得"，该前提不成立时不得转嫁举证责任。
+
+## 七、涉案财产处置辩护（v3 强化，依反有组织犯罪法第四章逐条打）
+- 权属四分类：个人合法财产 / 家庭成员及案外人财产 / 企业合法资产 / 违禁品与供犯罪
+  所用财物，逐笔建账，反对"一锅端"式查冻扣；
+- 程序审查：反有组织犯罪法第41条要求严格区分违法所得与合法财产、本人与家属财产、
+  减少对企业正常经营影响，与案件无关财物 3 日内解除；查冻扣清单、权属证明、审批手续
+  不齐的提出纠正；
+- 等值没收的边界：第45条第2款允许没收等值财产的前提是"应没收财产无法找到、灭失或
+  混同不可分割"，控方须先证明前提成立，不得直接对合法财产等值没收；
+- 特殊财产保护：为被告人及其扶养家属保留必需生活费用和物品；员工工资、税款账户、
+  企业经营性资产、善意第三人取得的财产优先主张解冻或返还；
+- 案外人救济：利害关系人可依第49条提出异议、申诉控告；庭审中财产性质权属应独立
+  进行法庭调查和辩论，不能"重人身轻财产"一带而过；
+- 先行处置审查：第43条易损毁物品、有价证券等先行变现须经主要负责人批准并告知，
+  程序瑕疵可主张处置违法。
+
+## 八、控方常见指控套路与反制清单（v3 新增，师徒传承的"坑点地图"）
+1. 套路一"包装组织特征"：把公司人事架构、正常管理制度说成组织层级和帮规戒律。
+   反制：调取公司章程、考勤、社保、劳动合同，证明是合法市场主体而非犯罪组织；
+2. 套路二"注水经济特征"：把企业全部营收计入组织经济实力。
+   反制：做合法收入占比审计，逐笔审查资金去向，剥离个人消费与合法经营支出；
+3. 套路三"凑多次行为特征"：把治安案件、民事纠纷、已处理事实打包计数。
+   反制：逐案建立三色清单（能认定/存疑/应排除），过时效、已处理、证据不足的坚决剔除；
+4. 套路四"软暴力扩大化"：把正常讨债、商业谈判、上访维权定性为软暴力。
+   反制：严格对照软暴力四要件，重点打"心理强制效果"和"不法目的"两个要件；
+5. 套路五"标签反推个案"：先扣黑社会帽子，再反向推定每个个罪成立。
+   反制：坚持个罪独立证明标准，个罪证据不足的作无罪/存疑辩护，不允许标签代替证据；
+6. 套路六"虚化非法控制"：用"在当地影响恶劣"替代具体区域/行业的非法控制证明。
+   反制：要求控方明确控制的具体范围并举证，用同业自由竞争证据反证，主攻降级恶势力；
+7. 套路七"口供中心主义"：以组织者、骨干有罪供述统领全案。
+   反制：排非 + 印证审查双管齐下，口供无客观证据印证的部分主张不能定案。
+
+## 九、量刑辩护（定罪后真正决定当事人刑期，情节逐项取证留痕）
+按"法定情节→酌定情节→程序从宽→财产刑"顺序逐项核查，每项都要卷宗出处：
+1. 角色区分：组织者/领导者、积极参加者、其他参加者的证据是否充分，角色存疑作有利于
+   被告人的降档主张；从犯（刑法第27条）应当从轻、减轻或免除，胁从犯（第28条）
+   应按情节减轻或免除；
+2. 自首与坦白：区分一般自首、特别自首、坦白；核查到案经过是否属"明知他人报警而在
+   现场等候"等视为自动投案情形；电话通知到案后如实供述的实务认定规则要研究；
+3. 立功：一般/重大立功（揭发他人犯罪、提供重要线索得以侦破其他案件），注意线索来源
+   合法性，非法手段获取的不认定；反有组织犯罪法第33条的配合从宽对一般参加者是重要筹码；
+4. 认罪认罚（刑诉法第15条）：自愿性、具结书、律师在场；量刑建议明显不当可申请调整，
+   认罪认罚不等于放弃涉黑定性辩护（见 7.6）；
+5. 退赃退赔、赔偿谅解、预交罚金：作为酌定从宽，同时换取查封财产部分解冻；
+6. 累犯/特别再犯风险：核查前后罪性质、时间间隔是否满足，防止错误认定从严情节；
+7. 缓刑空间：一般参加者不适用反有组织犯罪法第22条从严规则，符合条件大胆主张缓刑；
+8. 量刑计算：依据案发地《常见犯罪量刑指导意见》实施细则，列起点刑→基准刑→调节刑
+   全过程，每一步标注情节调节比例，数字一律回原文核验，禁止估算。
+
+## 十、关联个罪辩点库（对接"十类新型黑恶"9 篇实务文章）
+涉黑案往往伴随大量个罪并罚，个罪打掉一个，"多次违法犯罪"与并罚基础就塌一块。
+下列数额/情节标准各地不同，引用前必须回权威库核验案发地标准：
+- 寻衅滋事罪（第293条）：审查动机是否"逞强耍横"、情节是否达恶劣/严重程度；
+  债务纠纷、邻里矛盾引发的冲突优先往民事/治安方向辩护；
+- 催收非法债务罪（第293条之一，刑修十一新增）：仅限催收"高利放贷等非法债务"，
+  先打债务合法性——合法债务催收不构成本罪；注意从旧兼从轻的时间效力；
+- 敲诈勒索罪（第274条）：核心是非法占有目的与胁迫行为；合法维权、有真实请求权基础、
+  索赔金额与损失相当的不构成；职业打假/恶意索赔重点打"虚构事实+要挟"因果链；
+- 强迫交易罪（第226条）：审查暴力威胁、是否违背真实意愿、情节是否严重，
+  正常商业谈判与霸王条款不等于强迫交易；
+- 侵犯公民个人信息罪（第253条之一）：信息来源、条数鉴定、违法所得计算均需质证，
+  批量信息去重、真伪存疑的作有利于被告人认定；
+- 侮辱、诽谤等网络暴力犯罪（第246条等）：自诉案件属性、转发量/点击量证据固定、
+  传播行为与被告人的因果关系是质证重点；
+- 每个个罪固定输出：入罪要件清单 → 卷宗证据对应表 → 3 个以上辩护切口 →
+  时效与既判力审查 → 待补强事项；证据不足的明确写"建议作无罪/存疑不起诉辩护"。
+
+## 十一、37 天黄金救援作战表与分阶段 SOP（v3 新增，把经验变成时间表）
+### 13.1 侦查阶段 37 天作战表（刑拘 30 天 + 批捕审查 7 天）
+- 第 1–3 天：立即会见，了解到案经过、本人角色、涉案事实，释明诉讼权利与认罪认罚后果，
+  同步做利益冲突审查和委托手续；
+- 第 4–10 天：持续会见核对事实，向侦查机关了解涉嫌罪名和已查明事实，收集证明其
+  系一般参加者、被胁迫、仅提供合法劳务的初步材料；
+- 第 11–25 天：针对财产措施提出异议，对违法限制会见、违法技侦提出申诉控告，
+  评估是否申请变更强制措施并准备材料；
+- 第 26–30 天：公安提请批捕前，提交《不予提请批准逮捕的法律意见》；
+- 第 31–37 天：检察院审查批捕期间，提交《不予批准逮捕法律意见》并争取当面陈述，
+  这是改变羁押状态最关键的窗口；不批捕即应释放或变更强制措施。
+### 13.2 全流程 11 步 SOP
+1. 接案：利益冲突审查、委托手续、罪名与强制措施清单；
+2. 会见：代号化笔录，问组织结构、本人角色、事实时间线、财产来源、到案经过；
+3. 卷宗工程：OCR→Markdown→台账→深读四把锁（对应手册第三章）；
+4. 评分定位：用第十四节评分表跑一遍，确定三级辩护目标；
+5. 要件攻防：四特征四栏表＋阶梯降级比对表＋个罪辩点库；
+6. 程序排非与财产审查：同步推进，不等到审判阶段；
+7. 量刑核查：法定/酌定情节逐项取证，输出量刑计算过程；
+8. 类案检索：元典权威库检索同地区、同要件不认定/降档案例，形成类案检索报告；
+9. 文书产出：结论摘要→攻防表→辩护意见→《待核实清单》，全部带出处；
+10. 庭审准备：发问提纲、质证表、三轮辩论稿、对控方七套路的应急问答；
+11. 判后复盘：判决采纳/未采纳观点回填本 Skill，更新反制点与坑点地图。
+
+## 十二、四特征量化评分表（定位辩护目标的沟通工具）
+四特征各拆 3 个子项共 12 项，每项按卷宗证据三态赋分：成立=2 分、存疑=1 分、
+不成立/无证据=0 分，满分 24 分。硬规则优先于分数：任一特征整体不成立，
+即不能认定黑社会性质组织，评分仅用于团队内部与客户沟通，不对外作为法律意见。
+- 总分 ≤ 8 且至少一个特征为 0 分：主攻第一目标（无罪/不按黑社会处理）；
+- 总分 9–15：主攻第二目标（降级恶势力或普通共同犯罪）；
+- 总分 ≥ 16：入罪可能性高，主攻第三目标（角色降档＋量刑＋财产刑）；
+- 每次评分必须附每项的卷宗页码依据，禁止凭印象打分；评分随补证动态更新。
+
+## 十三、常用文书模板库（v3 新增，AI 按固定骨架起草、律师改定）
+1. 不予批准逮捕法律意见：当事人基本情况（代号）→涉案事实存疑点→不符合逮捕条件的
+   社会危险性分析→一般参加者/从犯等从宽情节→具体请求；
+2. 非法证据排除申请书：申请排除的证据范围→线索材料（时间地点人员方式）→法律依据→
+  申请召开庭前会议；
+3. 羁押必要性审查申请：案情变化→认罪认罚/退赃等新情况→无继续羁押必要的理由→
+  保证人或保证金方案；
+4. 涉案财产解除查封/冻结异议：财产权属证明→与案件无关的事实理由→反有组织犯罪法
+  第41/49条依据→请求事项；
+5. 鉴定/审计重新鉴定申请：原鉴定资质/检材/方法/结论的具体问题→重新鉴定的必要性；
+6. 辩护词（定性部分）：四特征逐项攻防＋阶梯降级主张，每论点带卷宗页码和法条；
+7. 辩护词（量刑部分）：法定/酌定情节清单＋起点刑到调节刑计算表＋具体量刑请求；
+8. 类案检索报告：检索条件与库源→同地区同要件不认定/降档案例→裁判要旨→本案对照。
+所有模板统一规则：代号化书写、每个主张带出处、文末附《待核实清单》和人工终审声明。
+
+## 十四、法源清单（分级管理，引用前一律回原文核验时效与条号）
+A 级（已核验、现行有效，引用时仍复核版本）：
+- 《中华人民共和国刑法》第27、28、67、226、246、253条之一、274、293、293条之一、
+  294条（2023修正，2024-03-01施行）；
+- 《中华人民共和国反有组织犯罪法》（2022-05-01施行），重点第19、22、30、32、33、
+  34、35、36、41、43、45、46、49、61条；
+- 《中华人民共和国刑事诉讼法》第15、39、95、97条及非法证据排除相关规定。
+B 级（权威文件，条号与时效须先回原文核验、存入本地让 AI 读透后再引用）：
+- 全国人大常委会《关于刑法第二百九十四条第一款的解释》（2002 立法解释·四特征）；
+- 两高两部 2018《关于办理黑恶势力犯罪案件若干问题的指导意见》；
+- 两高两部 2019《关于办理恶势力刑事案件若干问题的意见》；
+- 两高两部 2019《关于办理实施"软暴力"的刑事案件若干问题的意见》；
+- 两高两部 2019《关于办理利用信息网络实施黑恶势力犯罪刑事案件若干问题的意见》；
+- 2009、2015 黑社会性质组织犯罪座谈会纪要；最高法量刑指导意见及案发地实施细则；
+- 两高三部《关于依法保障律师执业权利的规定》《人民检察院刑事诉讼规则》相关条款。
+C 级（说理素材，不能单独作为法律依据）：
+- 权威指导案例、公报案例、优秀辩护词，以及 13 篇《法悟｜扫黑除恶解读》实务文章
+  （白雁军、张飞虎），把本地文件路径或链接填在这里让 AI 先读透：
+  【本地素材路径/链接：在此填写】
+
+## 十五、输出结构、复核门禁与执业风险防控
+### 17.1 输出结构
+1. 先出《结论摘要》：评分总分与目标顺位＋四特征初步判断（成立/存疑/可打掉）；
+2. 再按四特征逐栏展开，每个观点后跟【代号文件名+页码】或具体法条出处，指不出出处的不写；
+3. 再出阶梯降级、个罪辩点、量刑计算、特殊程序、财产处置五张清单；
+4. 统一出《待核实清单》：拿不准的法条案号、数字、金额、人数、期限一律标"待核"。
+### 17.2 落盘前五道门禁
+法条时效（回权威库核验）→ 出处闭环（无裸结论）→ 缺口显性化（无静默略过）→
+数据合规（全文代号无真实信息）→ 人工终审声明。任一不过退回修改并报告原因。
+### 17.3 律师执业风险红线（v3 新增，保护律师自己）
+- 不帮助串供、伪造毁灭证据、诱导当事人作虚假陈述；会见时不传递任何物品、不透露同案
+  供述细节，只做法律层面的分析和权利告知；
+- 不承诺案件结果、不承诺"捞人"，辩护方案以书面法律意见呈现并留痕；
+- 发现卷宗未脱敏或出现真实身份信息，立即停止 AI 处理，回到本机脱敏流程；
+- 风险代理在刑事案件中受限，收费与委托合同合规；妥善保管案卷，防止泄露当事人隐私；
+- 文首固定声明：本文件为 AI 辅助成果，不直接提交司法机关或发送客户，由承办律师终审负责。</pre>
+  <div class="box tip"><span class="t">v3 像一名老律师了什么</span>v2 解决"框架全不全"，v3 补上<strong>只能靠办案积累的隐性经验</strong>：破除"涉黑会见要审批"的误区、37 天黄金救援时间表、控方七类指控套路反制、反有组织犯罪法财产条款逐条打法、八类文书骨架，以及律师自身的执业风险红线。每办完一个同类案件，把新反制点和坑回填第十节"坑点地图"，技能随案件越攒越厚，这就是 L4 说的"持续往下拆、往下沉淀"。</div>
+</section>
+
+<!-- ================= 第五章 ================= -->
+<section class="ch" id="ch5">
+  <h2><span class="no">05</span>靠得住：《质量优先》铁律</h2>
+  <p>与其每次开工都苦口婆心叮嘱一遍，不如把要求写成 AI 自动遵守的规矩。核心就一句话：宁可这一步只推进一点点，也绝不产出要返工的东西。</p>
+
+  <h3>5.1 铁律全文（可存成全局技能，或开工前整段粘贴）</h3>
+<pre># 质量优先执行纪律
+
+## 角色与目标
+你是一名资深专家，负责端到端交付。质量优先级绝对高于速度：宁可单次推进
+幅度极小，也绝不产出需要返工的成果。进度数字毫无意义，正确才是进度。
+
+1. 先规划后执行：开工前输出任务拆解清单(WBS)、子任务依赖与顺序、每个
+   子任务的验收标准、所需材料清单；每个子任务须能在单轮上下文内独立完成
+   并独立验证；规划经确认后再动手。
+2. 小步增量、步步闭环：逐个子任务推进，每步完成立即自检，确认无误再进
+   下一步；不带着缺陷进入下一步，杜绝虚假进度。
+3. 上下文预算管理：主动控制单次输入输出，长内容分批、分模块交付；关键结
+   论与进度随时结构化沉淀为持久文件，作为跨轮衔接锚点；不得以省上下文为
+   名压缩必要的理解过程。
+4. 材料穷尽与深读（核心，任何任务不得豁免）：严禁只读目录、标题、文件名
+   或摘要即动手；每个子任务先把涉及的每份材料逐份完整读取；严格分两阶段
+   ——阶段一充分输入（精读→提炼要点/约束/关联），阶段二分析判断，禁止
+   边读边猜；产出前先用自己的话复述关键信息，复述不出即回补阅读；任何结
+   论都要能指回依据的具体位置（路径+行号/段落/页码）。
+5. 零返工质量门禁：交付前对照验收标准逐项核验，不过不提交；允许慢，但每
+   一分推进都确定有效。
+6. 异常处理：遇歧义或可能引发返工的决策点，立即暂停澄清，不自行假设强
+   推；发现前期问题第一时间显性报告（问题/影响/修复方案）。
+7. 每轮三行头汇报：
+   【当前子任务】&lt;编号+名称&gt;
+   【完成状态】未开始 / 进行中(已读材料 x/y) / 已完成并自检通过 / 阻塞:原因
+   【下一步】&lt;具体动作及依据材料&gt;</pre>
+
+  <h3>5.2 怎么让它长期生效（三种方式，任选）</h3>
+  <table>
+    <thead><tr><th>方式</th><th>做法</th><th>适合</th></tr></thead>
+    <tbody>
+      <tr><td>项目规则文件</td><td>在项目文件夹放 <code class="inline">AGENTS.md</code>，把铁律贴进去，该项目下自动生效</td><td>某个案件/专项专用</td></tr>
+      <tr><td>全局技能</td><td>在 opencode 的全局规则/技能目录保存为一个技能文件（如 <code class="inline">engineering-quality.md</code>），处理重要复杂任务时调用</td><td>所有任务通用</td></tr>
+      <tr><td>零配置</td><td>什么都不存，每次开新任务时把 5.1 全文整段粘贴在最前面</td><td>偶尔使用</td></tr>
+    </tbody>
+  </table>
+  <div class="box tip"><span class="t">四字诀</span>规（先规划、验一步）· 透（深读不豁免）· 停（拿不准就问）· 报（三行头汇报）。技能会越攒越厚，规矩始终不变。</div>
+</section>
+
+<!-- ================= 第六章 ================= -->
+<section class="ch" id="ch6">
+  <h2><span class="no">06</span>不会写代码：把要求说清楚，让 AI 替你搭</h2>
+  <p>本手册里的代理脚本和配置文件，我自己一行代码都没写。做法是把"要什么效果、出问题怎么切换、密钥怎么保护"讲清楚，让 AI 生成，再让它逐段解释给我听。一个好用的<strong>四段式需求模板</strong>：</p>
+  <ol>
+    <li><strong>目标与环境</strong>：什么系统、要实现什么、监听在哪；</li>
+    <li><strong>行为规则</strong>：正常时怎样、异常（限流/欠费/失效）时分别怎样；</li>
+    <li><strong>安全约束</strong>：密钥只读本机文件、日志只留后几位、占位符由本人粘贴；</li>
+    <li><strong>运维要求</strong>：配置热生效、开机自启、逐段解释、给出验证方法。</li>
+  </ol>
+  <p>第一章的代理、第零章的安装、第三章的本地 OCR，用的都是同一个套路。接数据库、配 MCP 同理：让它生成配置，密钥位置先留 <code class="inline">sk_你的KEY</code> 占位符，最后由你本人粘贴。</p>
+  <div class="box note"><span class="t">判断生成结果靠不靠谱</span>让它逐段解释代码意图；检查日志里有没有完整密钥；要求它给出"怎么验证生效"和"出错了看哪个文件"。看不懂的脚本不要放进开机自启。</div>
+</section>
+
+<!-- ================= 第七章 ================= -->
+<section class="ch" id="ch7">
+  <h2><span class="no">07</span>两条不能让的线</h2>
+  <div class="box warn"><span class="t">数据线</span>命令行工具不等于本地处理，大模型仍在云端。刑事卷宗等敏感材料能本机就不上云、不放云同步盘；确需用云端推理的，先在本机脱敏成代号、词典不出本机，成稿后本地还原，且脱敏本身要达到 100%（详见 3.5）。密钥当密码管，不进公开仓库、聊天记录和截图。</div>
+  <div class="box warn"><span class="t">专业线</span>AI 产出不直接提交司法机关或发送客户；法条、案号、数字、期限回权威原文人工终审；拿不准一律标"待核"。AI 放大专业判断，不替代职业判断。</div>
+  <div class="box gold"><span class="t">一句收束</span>所谓"专属智能体"，说穿了就是把你自己的流程、规矩和判断，交给它稳定地重跑一遍。工具形态会变，真正谁也拿不走的，是你沉淀下来的那套东西。</div>
+</section>
+
+<!-- ================= 第八章：FAQ ================= -->
+<section class="ch" id="ch8">
+  <h2><span class="no">08</span>上手前最常问的八个问题</h2>
+
+  <h3>Q1　我不写代码，真的能自己搭起来吗？</h3>
+  <p>能。本手册里所有脚本和配置都不是我手写的，而是把要求讲清楚让 AI 生成。你的任务只有两个：会复制粘贴，会把运行结果原样发回去问。卡住时把报错信息完整发给 AI，让它给下一步，不要自己猜。</p>
+
+  <h3>Q2　11 月 8 日活动结束了怎么办？还能用这套方法吗？</h3>
+  <p>活动只影响价格，不影响方法。活动后可按原价或新的官方活动订阅，第一章的单账号、代理配置完全不变；已经写好的 opencode.json 只需换 Key，不用重搭。</p>
+
+  <h3>Q3　代理跑起来后，healthz 打不开或提示连接失败？</h3>
+  <ul>
+    <li>先确认 start.bat 的黑窗口还开着、没有报错退出（关掉窗口代理就停了）；</li>
+    <li>确认端口 18234 没被别的程序占用，Python 已正确安装并在 PATH 里；</li>
+    <li>看同目录 proxy.log 最后几行；把报错整段发给 AI 助手排查，不要只截一句。</li>
+  </ul>
+
+  <h3>Q4　Key 填进去报 401/403？</h3>
+  <p>八成是这三种：Key 复制时多了空格或换行、Key 已被禁用或删除、套餐未生效或已到期。先去控制台重新复制一次完整 Key，再确认套餐状态；代理模式下还会把失效 Key 自动冷却 30 分钟，可在 proxy.log 里看到记录。</p>
+
+  <h3>Q5　MCP 数据库提示积分/余额不足？</h3>
+  <p>按第二章 2.2 的降级规则走：先用 get_user_balance 查当前账号余额（这个动作不扣积分），不足就切到下一优先级账号；不要同时对多个账号发同一个付费请求，否则会重复扣费。</p>
+
+  <h3>Q6　AI 还是会"装作读过"材料，怎么治？</h3>
+  <p>回到第三章 3.7 的四把锁：读做分离、分批不抽样、读完复述、结论带出处。再加一条硬约束：让它每轮开头报"已读 x/y"，数字对不上台账就打回。材料本身是扫描件的，先确认 OCR 这一步过了关（3.3、3.4）。</p>
+
+  <h3>Q7　Skill（技能）到底存在哪、怎么生效？</h3>
+  <p>三种方式按勤快程度选：偶尔用就开工前整段粘贴（第五章 5.1）；某个案件专用，就放进该案件文件夹的 AGENTS.md；想所有任务通用，就存成全局技能文件（如 5.2 表里的 engineering-quality.md）。新存的技能，重开一个会话确认它被读到再正式用。</p>
+
+  <h3>Q8　真实卷宗到底能不能用云端 AI？</h3>
+  <p>不能直接用。命令行工具不等于本地处理，模型仍在云端。正确顺序是先在本机脱敏（真实信息换代号、词典不出本机），再让云端处理代号文本，成果回本机还原；涉密材料优先全本地、断网方案。脱敏要做到 100%，99% 就等于有 1% 在裸奔，详见 3.5。</p>
+</section>
+
+<!-- ================= 附录章：Skill 制作现场演示 ================= -->
+<section class="ch" id="ch9">
+  <h2><span class="no">09</span>现场演示：13 篇专业文章如何炼成一个涉黑辩护 Skill</h2>
+  <p>第四章 L2 说"给 AI 配上专属罪名 Skill"，这一章把<strong>制作全过程搬到台上</strong>。素材是我所白雁军主任、张飞虎主任合写的《法悟｜扫黑除恶解读》系列 13 篇公众号文章；做法只有一句话：<strong>把文章链接整批发给 AI 读透，再让它结合法律法规、司法解释做核验，最后按固定框架沉淀成一个可复用的 Skill 文件</strong>。点下方「▶ 自动播放」即可观看全流程，也可以点阶段圆点直接跳转到任意一步。</p>
+  <div class="box note"><span class="t">演示说明</span>下面的动画是对真实作业流程的<strong>可视化复盘</strong>：日志、核验状态与生成结构均按实际操作顺序呈现；正式作业时法条核验走第二章的元典 MCP 权威库，文章链接打开的是微信原文。</div>
+
+  <div class="dm-demo" id="dmDemo">
+    <div class="dm-controls">
+      <button class="dm-btn" id="dmPlay" type="button">▶ 自动播放</button>
+      <button class="dm-btn" id="dmReset" type="button">↺ 重置</button>
+      <div class="dm-dots" id="dmDots">
+        <button class="dm-dot" type="button" data-go="0"><span class="b">1</span><span class="ln"></span><span>素材投喂</span></button>
+        <button class="dm-dot" type="button" data-go="1"><span class="b">2</span><span class="ln"></span><span>深读提炼</span></button>
+        <button class="dm-dot" type="button" data-go="2"><span class="b">3</span><span class="ln"></span><span>法源核验</span></button>
+        <button class="dm-dot" type="button" data-go="3"><span class="b">4</span><span class="ln"></span><span>融合生成</span></button>
+        <button class="dm-dot" type="button" data-go="4"><span class="b">5</span><span class="ln"></span><span>成品落地</span></button>
+      </div>
+    </div>
+    <div class="dm-progress-wrap"><div class="dm-progress" id="dmProgress"></div></div>
+
+    <!-- 阶段一：素材投喂 -->
+    <div class="dm-stage" data-stage="0">
+      <div class="dm-stage-head">
+        <span class="sn">STEP 1 / 5</span><h4>素材投喂：把 13 篇专业文章链接发给 AI</h4>
+        <span class="dm-counter" id="dmCounter1">0 / 13</span>
+      </div>
+      <p class="dm-stage-sub">三篇色标：<span class="dm-tag t-feat">四特征</span>黑社会性质组织法定特征 · <span class="dm-tag t-eli">恶势力</span>恶势力组织认定 · <span class="dm-tag t-new">新型黑恶</span>十类新型黑恶犯罪。卡片可点击打开微信原文。</p>
+      <div class="dm-art-grid" id="dmArticles">
+        <div class="dm-art g-feat"><span class="idx">01</span><span class="at"><a href="https://mp.weixin.qq.com/s/dxjO03-lDs6BXLpIQSZk5w" target="_blank" rel="noopener"><span class="dm-tag t-feat">四特征</span>扫黑除恶解读（一）· 组织特征</a><span class="au">白雁军 · 张飞虎</span></span></div>
+        <div class="dm-art g-feat"><span class="idx">02</span><span class="at"><a href="https://mp.weixin.qq.com/s/ErkgC7Oll-TOqH1Mp_8SgQ" target="_blank" rel="noopener"><span class="dm-tag t-feat">四特征</span>扫黑除恶解读（二）· 经济特征</a><span class="au">白雁军 · 张飞虎</span></span></div>
+        <div class="dm-art g-feat"><span class="idx">03</span><span class="at"><a href="https://mp.weixin.qq.com/s/6Jbgt2ZSdYnth1FiXXdfaQ" target="_blank" rel="noopener"><span class="dm-tag t-feat">四特征</span>扫黑除恶解读（三）· 行为特征</a><span class="au">白雁军 · 张飞虎</span></span></div>
+        <div class="dm-art g-eli"><span class="idx">04</span><span class="at"><a href="https://mp.weixin.qq.com/s/6bTgcuFT2YS_k04IuZ-hMA" target="_blank" rel="noopener"><span class="dm-tag t-eli">恶势力</span>扫黑除恶解读（五）· “恶势力”的认定</a><span class="au">白雁军 · 张飞虎</span></span></div>
+        <div class="dm-art g-new"><span class="idx">05</span><span class="at"><a href="https://mp.weixin.qq.com/s/FQo-LLTjYLXKGvzch5Jc5Q" target="_blank" rel="noopener"><span class="dm-tag t-new">新型黑恶</span>扫黑除恶解读（六）· 软暴力催收</a><span class="au">白雁军 · 张飞虎</span></span></div>
+        <div class="dm-art g-new"><span class="idx">06</span><span class="at"><a href="https://mp.weixin.qq.com/s/n2kgwbi7v9Na1xoECIBz1g" target="_blank" rel="noopener"><span class="dm-tag t-new">新型黑恶</span>扫黑除恶解读（七）· 恶意索赔</a><span class="au">白雁军 · 张飞虎</span></span></div>
+        <div class="dm-art g-new"><span class="idx">07</span><span class="at"><a href="https://mp.weixin.qq.com/s/3rlEnyvBXtyn36UB2s7y_A" target="_blank" rel="noopener"><span class="dm-tag t-new">新型黑恶</span>扫黑除恶解读（八）· 舆情敲诈</a><span class="au">白雁军 · 张飞虎</span></span></div>
+        <div class="dm-art g-new"><span class="idx">08</span><span class="at"><a href="https://mp.weixin.qq.com/s/od0bvypi7fHsQu9C5vnlxw" target="_blank" rel="noopener"><span class="dm-tag t-new">新型黑恶</span>扫黑除恶解读（九）· 务工敲诈</a><span class="au">白雁军 · 张飞虎</span></span></div>
+        <div class="dm-art g-new"><span class="idx">09</span><span class="at"><a href="https://mp.weixin.qq.com/s/tNbfaU6FAby8POaVDtOKXA" target="_blank" rel="noopener"><span class="dm-tag t-new">新型黑恶</span>扫黑除恶解读（十）· 碰瓷敲诈</a><span class="au">白雁军 · 张飞虎</span></span></div>
+        <div class="dm-art g-new"><span class="idx">10</span><span class="at"><a href="https://mp.weixin.qq.com/s/LmzB7f-6H6pJOhUgRLgLCg" target="_blank" rel="noopener"><span class="dm-tag t-new">新型黑恶</span>扫黑除恶解读（十一）· 强迫消费</a><span class="au">白雁军 · 张飞虎</span></span></div>
+        <div class="dm-art g-new"><span class="idx">11</span><span class="at"><a href="https://mp.weixin.qq.com/s/RZxgT6GoKIfrcOUY2XzC-w" target="_blank" rel="noopener"><span class="dm-tag t-new">新型黑恶</span>扫黑除恶解读（十二）· 色情敲诈</a><span class="au">白雁军 · 张飞虎</span></span></div>
+        <div class="dm-art g-new"><span class="idx">12</span><span class="at"><a href="https://mp.weixin.qq.com/s/JhAFC80-g4LBuUhQyhMsBA" target="_blank" rel="noopener"><span class="dm-tag t-new">新型黑恶</span>扫黑除恶解读（十三）· 裸聊敲诈</a><span class="au">白雁军 · 张飞虎</span></span></div>
+        <div class="dm-art g-new"><span class="idx">13</span><span class="at"><a href="https://mp.weixin.qq.com/s/-RvTuunZuHWept2z3lvdMQ" target="_blank" rel="noopener"><span class="dm-tag t-new">新型黑恶</span>扫黑除恶解读（十五）· 网络暴力</a><span class="au">白雁军 · 张飞虎</span></span></div>
+      </div>
+      <div class="dm-note-line" id="dmGapNote" style="opacity:0;transition:opacity .5s">如实记录：本批文章覆盖组织、经济、行为三个特征与恶势力、新型黑恶，<strong>“非法控制（危害性）特征”没有专文</strong>——这个缺口不会被 AI 悄悄略过，STEP 3 由权威法源补全。</div>
+    </div>
+
+    <!-- 阶段二：深读提炼 -->
+    <div class="dm-stage" data-stage="1">
+      <div class="dm-stage-head">
+        <span class="sn">STEP 2 / 5</span><h4>AI 深读提炼：按第三章“深读四把锁”逐篇读完再输出</h4>
+      </div>
+      <p class="dm-stage-sub">读做分离、分批不抽样、读完复述、结论带出处。以下是 AI 真实作业时逐行汇报的终端日志（演示自动逐行打出）。</p>
+      <div class="dm-terminal">
+        <div class="bar"><i></i><i></i><i></i><span>opencode — 涉黑辩护 Skill 构建任务</span></div>
+        <div class="screen" id="dmScreen"></div>
+      </div>
+    </div>
+
+    <!-- 阶段三：法源核验 -->
+    <div class="dm-stage" data-stage="2">
+      <div class="dm-stage-head">
+        <span class="sn">STEP 3 / 5</span><h4>法源核验：MCP 权威库逐条比对，不许凭记忆写法条</h4>
+      </div>
+      <p class="dm-stage-sub">对应第二章：文章观点只作 C 级说理素材，法条必须回权威库核验时效与条号；A 级可直接引用，B 级引用前再复核版本。</p>
+      <div class="dm-verify-list" id="dmVerify">
+        <div class="dm-vrow"><span class="st loading">待核验</span><span class="nm">《中华人民共和国刑法》第二百九十四条（2023 修正，2024-03-01 施行）</span><span class="lv A">A 级</span><span class="ck">···</span></div>
+        <div class="dm-vrow"><span class="st loading">待核验</span><span class="nm">全国人大常委会《关于刑法第二百九十四条第一款的解释》（2002 立法解释·四特征）</span><span class="lv B">B 级</span><span class="ck">···</span></div>
+        <div class="dm-vrow"><span class="st loading">待核验</span><span class="nm">最高法等《办理黑社会性质组织犯罪案件座谈会纪要》（2009 纪要）</span><span class="lv B">B 级</span><span class="ck">···</span></div>
+        <div class="dm-vrow"><span class="st loading">待核验</span><span class="nm">最高法《全国部分法院审理黑社会性质组织犯罪案件工作座谈会纪要》（2015 纪要）</span><span class="lv B">B 级</span><span class="ck">···</span></div>
+        <div class="dm-vrow"><span class="st loading">待核验</span><span class="nm">两高两部《关于办理黑恶势力犯罪案件若干问题的指导意见》（2018 指导意见）</span><span class="lv B">B 级</span><span class="ck">···</span></div>
+        <div class="dm-vrow"><span class="st loading">待核验</span><span class="nm">两高两部《关于办理实施“软暴力”的刑事案件若干问题的意见》（2019）</span><span class="lv B">B 级</span><span class="ck">···</span></div>
+        <div class="dm-vrow"><span class="st loading">待核验</span><span class="nm">《中华人民共和国反有组织犯罪法》（2022 施行）</span><span class="lv A">A 级</span><span class="ck">···</span></div>
+      </div>
+      <div class="dm-note-line" id="dmFillNote" style="opacity:0;transition:opacity .5s">缺口补全：非法控制（危害性）特征的法定表述、认定口径与“保护伞”路径，依据上述 2002 立法解释与 2018 指导意见补入 Skill，并标注来源；13 篇文章统一归入 C 级说理素材，不单独充当法律依据。</div>
+    </div>
+
+    <!-- 阶段四：融合生成 -->
+    <div class="dm-stage" data-stage="3">
+      <div class="dm-stage-head">
+        <span class="sn">STEP 4 / 5</span><h4>融合生成：把大模型的“思考过程”拆给你看（4 个推理子步）</h4>
+      </div>
+      <p class="dm-stage-sub">矩阵不是“问一句就蹦出来”的。AI 内部要依次完成要件拆解 → 证据印证 → 控辩对抗推演 → 汇总成文，每一步都留痕、都可复核。自动播放时依次演示，也可点子步标签直接查看。</p>
+      <div class="dm-subtabs" id="dmSubtabs">
+        <button class="dm-subtab active" type="button" data-sub="0"><span class="n">4.1</span>要件拆解</button>
+        <button class="dm-subtab" type="button" data-sub="1"><span class="n">4.2</span>证据印证</button>
+        <button class="dm-subtab" type="button" data-sub="2"><span class="n">4.3</span>对抗推演</button>
+        <button class="dm-subtab" type="button" data-sub="3"><span class="n">4.4</span>汇总成文</button>
+      </div>
+
+      <!-- 4.1 要件拆解树 -->
+      <div class="dm-subpane active" data-sub="0">
+        <p class="dm-pane-title">子步 4.1 · 法定要件拆解树：先把《刑法》294 条拆成可逐项攻防的审查节点</p>
+        <p class="dm-pane-note">每个叶子节点挂上法源坐标与文章来源，后续所有判断都必须能回溯到节点，禁止脱离要件空谈。</p>
+        <div class="dm-tree" id="dmTree">
+          <ul>
+            <li class="root">黑社会性质组织 = 四特征【同时具备】，缺一即不成立 <span class="src">《刑法》第294条第5款 · 2002立法解释</span>
+              <ul>
+                <li class="branch"><span class="bh">① 组织特征</span><span class="src">解读（一）</span>
+                  <span class="leaf">组织稳定性：存续时间、核心成员是否稳定 <span class="cite">2009纪要</span></span>
+                  <span class="leaf">组织规模性：“人数较多”不搞一刀切 <span class="cite">2018意见</span></span>
+                  <span class="leaf">组织结构性：组织者/领导者/骨干成员是否基本固定</span>
+                </li>
+                <li class="branch"><span class="bh">② 经济特征</span><span class="src">解读（二）</span>
+                  <span class="leaf">经济利益与获利手段：违法犯罪 + “其他手段”（含合法经营）</span>
+                  <span class="leaf">经济实力：2018意见已否定 20–50 万数额一刀切 <span class="cite">2015纪要→2018意见</span></span>
+                  <span class="leaf">支持组织活动：利益是否实际用于“以商养黑”</span>
+                </li>
+                <li class="branch"><span class="bh">③ 行为特征</span><span class="src">解读（三）+ 解读（六）软暴力</span>
+                  <span class="leaf">手段：暴力、威胁与“其他手段”（谈判/调解/滋扰）的边界</span>
+                  <span class="leaf">组织性：组织意志支配 vs 成员个人行为的五种识别情形 <span class="cite">2018意见</span></span>
+                  <span class="leaf">多次性：三次以上，但仅违法不犯罪不能升格认定 <span class="cite">2009纪要</span></span>
+                </li>
+                <li class="branch"><span class="bh">④ 非法控制（危害性）特征</span><span class="src">文章无专文 · 法源补全 <span class="prob">缺口已标记</span></span>
+                  <span class="leaf">“一定区域/行业”必须具体可证，空泛的“当地”不成立</span>
+                  <span class="leaf">控制程度：排除限制经营、心理强制；正常竞争≠非法控制</span>
+                  <span class="leaf">“保护伞”路径无证据则不成立 <span class="cite">2018意见</span></span>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- 4.2 证据印证表 -->
+      <div class="dm-subpane" data-sub="1">
+        <p class="dm-pane-title">子步 4.2 · 证据印证与矛盾排查：按刑诉“印证规则”把卷宗证据归位到要件节点</p>
+        <p class="dm-pane-note">演示以代号卷宗为例（真实作业先完成第 0 步脱敏）。AI 对每份证据做三件事：归属要件、判断印证状态、标出矛盾或缺口。</p>
+        <div style="overflow-x:auto">
+        <table class="dm-evtable" id="dmEvtable">
+          <thead><tr><th style="width:120px">要件节点</th><th>卷宗证据（代号）</th><th style="width:96px">印证状态</th><th>AI 的审查动作</th></tr></thead>
+          <tbody>
+            <tr><td><strong>组织特征</strong></td><td>【人员A】供述 p34 与【人员B】供述 p71 对“谁是领导者”说法相反</td><td><span class="dm-pill warn">矛盾待查</span></td><td>列入矛盾点清单，要求调取到案经过与聊天记录复核，不能择一采信</td></tr>
+            <tr><td><strong>组织特征</strong></td><td>【公司①】考勤表、劳动合同 p120-138</td><td><span class="dm-pill ok">反向印证</span></td><td>证明人员流动率高、骨干不固定，支撑“稳定性不足”反制点</td></tr>
+            <tr><td><strong>经济特征</strong></td><td>审计报告 p5：合法经营收入占比 82%</td><td><span class="dm-pill hold">部分印证</span></td><td>合法收入先行剥离；仅审查剩余 18% 是否用于支持组织活动</td></tr>
+            <tr><td><strong>经济特征</strong></td><td>银行流水 2019-2023（共 417 页）</td><td><span class="dm-pill warn">缺口</span></td><td>缺资金去向穿透分析，列入“待补强”，申请补充审计</td></tr>
+            <tr><td><strong>行为特征</strong></td><td>第 7 起事实已过追诉时效；第 11 起曾作治安处罚结案</td><td><span class="dm-pill ok">应剔除</span></td><td>从“多次违法犯罪”计数中剔除，防止重复评价与凑数</td></tr>
+            <tr><td><strong>行为特征</strong></td><td>【人员C】讨债微信记录 p203：仅有协商，无威胁用语</td><td><span class="dm-pill ok">反向印证</span></td><td>正常讨债不满足软暴力“心理强制”四要件，不能计入行为特征</td></tr>
+            <tr><td><strong>非法控制</strong></td><td>起诉书仅表述“在当地形成重大影响”，无区域/行业界定</td><td><span class="dm-pill warn">证明不足</span></td><td>要求控方明确“一定区域/行业”范围；同业证言可反证竞争自由</td></tr>
+          </tbody>
+        </table>
+        </div>
+      </div>
+
+      <!-- 4.3 对抗推演思维流 -->
+      <div class="dm-subpane" data-sub="2">
+        <p class="dm-pane-title">子步 4.3 · 控辩对抗推演（以“行为特征”为例完整展示一次推理链）</p>
+        <p class="dm-pane-note">AI 先替控方把命题证成，再站在辩方逐环拆解，最后给出置信度与待核项——先立后破，避免自说自话。</p>
+        <div class="dm-reason" id="dmReason"></div>
+        <div class="dm-concl" id="dmConcl"><strong>本节点推理结论：</strong>13 起指控事实中 2 起应剔除、3 起属个人行为应剥离、1 起软暴力要件不成立；行为特征“有组织多次”的计数基础实质性动摇，置信度：高（依据均已标注卷宗页码，待核 2 项已入清单）。</div>
+      </div>
+
+      <!-- 4.4 汇总矩阵 + 代码生成 -->
+      <div class="dm-subpane" data-sub="3">
+        <p class="dm-pane-title">子步 4.4 · 汇总成文：推理结论收敛为四栏攻防矩阵，并流式写入 Skill 文件</p>
+        <p class="dm-pane-note">上半部分是矩阵成品（逐格点亮），下半部分同步演示 AI 像工程师写代码一样把结论写进 Markdown，每条观点带法源/出处角标。</p>
+        <div class="dm-matrix">
+          <table>
+            <thead><tr><th style="width:118px">法定特征</th><th>① 控方命题</th><th>② 卷宗证据审查【代号文件+页码】</th><th>③ 我方反制点</th><th>④ 待补强</th></tr></thead>
+            <tbody id="dmMatrix">
+              <tr>
+                <td><strong>组织特征</strong></td>
+                <td><span class="k">稳定犯罪组织、人数较多、骨干基本固定</span>成员名册、层级供述、组织规约</td>
+                <td>到案经过、各被告人供述中关于层级的矛盾点；受雇佣/被胁迫者名单</td>
+                <td>松散临时纠合、时聚时散；人员流动频繁则骨干不固定；“规约”实为公司制度或行业惯例</td>
+                <td>成员名册与职责分工表；加入自愿性证据（蒙蔽、胁迫）</td>
+              </tr>
+              <tr>
+                <td><strong>经济特征</strong></td>
+                <td><span class="k">有组织敛财、具一定经济实力并支持组织活动</span>审计报告、银行流水、资产清单</td>
+                <td>资金来源与去向明细；合法经营收入与涉案资金的混同情况</td>
+                <td>合法企业正常经营所得剥离；收益用于个人消费/合法经营部分不计入；2018 意见已否定“20–50 万一刀切”</td>
+                <td>审计报告、流水、纳税记录，核算“涉组织”资金真实占比</td>
+              </tr>
+              <tr>
+                <td><strong>行为特征</strong></td>
+                <td><span class="k">暴力威胁或其他手段、有组织多次违法犯罪、为非作恶</span>逐案事实清单、软暴力证据</td>
+                <td>每起事实是否受组织意志支配；追诉时效、已受处理、证据不足事实</td>
+                <td>个人恩怨/孤立行为剥离；正常讨债、商业纠纷不等于软暴力；个案罪证不足不能靠“黑社会”标签反推</td>
+                <td>逐案证据清单，区分能认定 / 存疑 / 应排除三类事实</td>
+              </tr>
+              <tr>
+                <td><strong>非法控制<br>（危害性）特征</strong></td>
+                <td><span class="k">称霸一方、在一定区域或行业形成非法控制、严重破坏秩序</span>被害人陈述、行业数据、行政材料</td>
+                <td>“一定区域/行业”是否具体可证；空泛的“当地”不成立</td>
+                <td>正常市场竞争≠非法控制；未达排除限制经营、心理强制程度则不成立；无证据则“保护伞”路径不成立</td>
+                <td>同业经营者证言、招投标与行业准入材料，证明竞争仍自由</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="dm-codegen" style="margin-top:14px">
+          <div class="bar"><i></i><i></i><i></i><span>writing defense-gang-crime.md …（流式生成演示）</span></div>
+          <div class="body" id="dmCodegen"></div>
+        </div>
+        <div class="dm-done-tag" id="dmGenDone">✔ v3 全模块落盘：四特征攻防（含裁判规则层）＋ 5 层降级表 ＋ 7 项特殊程序 ＋ 控方 7 套路反制 ＋ 8 类量刑情节 ＋ 6 个个罪库 ＋ 37 天作战表 ＋ 8 类文书模板 ＋ 执业风险红线，出处角标 50+ 处，待核项 6 项已登记</div>
+      </div>
+    </div>
+
+    <!-- 阶段五：成品落地 -->
+    <div class="dm-stage" data-stage="4">
+      <div class="dm-stage-head">
+        <span class="sn">STEP 5 / 5</span><h4>成品落地：沉淀为可复用、可迭代的 Skill 文件</h4>
+      </div>
+      <p class="dm-stage-sub">文件写完不等于交付。AI 先跑一遍内置的“复核门禁”自检，通过后才落盘；下方可当场展开阅读 12 节完整 Skill、复制全文或直接下载 .md 带走复用，每办完一个同类案件再往里补料（对应 L4 持续沉淀）。</p>
+      <div class="dm-verify-list" id="dmGate" style="margin-bottom:16px">
+        <div class="dm-vrow"><span class="st loading">自检中</span><span class="nm">门禁 1 · 法条时效：7 部法源全部回权威库核验，无失效条号、无凭记忆引用</span><span class="lv A">A/B 级</span><span class="ck">···</span></div>
+        <div class="dm-vrow"><span class="st loading">自检中</span><span class="nm">门禁 2 · 出处闭环：16 个攻防单元每条结论均带【代号文件+页码】或法条坐标，无“裸结论”</span><span class="lv A">全通过</span><span class="ck">···</span></div>
+        <div class="dm-vrow"><span class="st loading">自检中</span><span class="nm">门禁 3 · 缺口显性化：非法控制特征的补全来源、会见权等特殊程序规则均标注法源，6 项拿不准内容进入《待核实清单》</span><span class="lv B">已标注</span><span class="ck">···</span></div>
+        <div class="dm-vrow"><span class="st loading">自检中</span><span class="nm">门禁 4 · 数据合规：全文使用【人员A】类代号，无真实人名、身份证号、住址等敏感信息</span><span class="lv A">全通过</span><span class="ck">···</span></div>
+        <div class="dm-vrow"><span class="st loading">自检中</span><span class="nm">门禁 5 · 人工终审提示：文件头写入“AI 产出不直接提交司法机关，律师终审负责”声明</span><span class="lv B">已写入</span><span class="ck">···</span></div>
+      </div>
+      <div class="dm-filecard" id="dmFile">
+        <div class="fname"><span class="ficon">MD</span>defense-gang-crime.md<span class="dm-tag t-feat" style="margin-left:6px">涉黑涉恶刑事辩护 Skill · v3</span></div>
+        <div class="meta">v3 共 16 节资深刑辩经验结晶 · 13 篇《法悟｜扫黑除恶解读》（C 级）＋ 权威库核验法源（A/B 级，含反有组织犯罪法专章规则）· 全文代号、数据合规前置 · 5 道复核门禁通过</div>
+        <ol class="dm-toc-list" id="dmToc">
+          <li>第 0 步 · 数据合规前置（脱敏与代号规则）</li>
+          <li>一、角色定位、三级辩护目标与策略辩证法</li>
+          <li>二、罪名谱系、法定刑与从严/从宽规则地图</li>
+          <li>三、四特征逐特征攻防（四栏输出＋裁判规则层）</li>
+          <li>四、阶梯降级辩护（黑社会→恶势力→普通共犯→个人）</li>
+          <li>五、涉黑特殊程序辩护（会见误区/37天/排非/技侦/分案）</li>
+          <li>六、证据法实战工具箱（印证失灵、鉴定质证、证人出庭）</li>
+          <li>七、涉案财产处置辩护（反有组织犯罪法第四章逐条打）</li>
+          <li>八、控方七类指控套路与反制清单（坑点地图）</li>
+          <li>九、量刑辩护（角色降档、自首立功、量刑计算）</li>
+          <li>十、关联个罪辩点库（对接十类新型黑恶九篇文章）</li>
+          <li>十一、37 天黄金救援作战表与分阶段 11 步 SOP</li>
+          <li>十二、四特征量化评分表（12 项三态赋分定位目标）</li>
+          <li>十三、八类常用文书模板库（逮捕意见/排非/异议/辩护词）</li>
+          <li>十四、法源清单（A/B/C 分级，反有组织犯罪法重点条款）</li>
+          <li>十五、输出结构、五道门禁与律师执业风险红线</li>
+        </ol>
+      </div>
+
+      <div class="dm-scorer" id="dmScorer">
+        <h4>Skill 内置工具 · 四特征量化评分表（可现场试算）</h4>
+        <p class="hint">12 个子项按卷宗证据三态赋分：成立 2 分 / 存疑 1 分 / 不成立或无证据 0 分，满分 24 分。演示中可直接点选，右侧目标卡片实时切换；硬规则：任一特征整体不成立即不能认定黑社会，分数只用于内部与客户沟通。</p>
+        <div id="dmScoreGroups"></div>
+        <div class="dm-score-summary">
+          <div class="dm-score-num"><span id="dmScoreVal">0</span><small> / 24</small></div>
+          <div class="dm-score-bar"><i id="dmScoreBar"></i></div>
+          <button class="dm-score-reset" id="dmScoreReset" type="button">清零重评</button>
+        </div>
+        <div class="dm-targets">
+          <div class="dm-target t1" id="dmT1"><span class="tn">第一目标 · 无罪/不按黑社会处理</span><span class="tr">总分 ≤ 8 且至少一个特征 0 分：主攻打掉组织定性</span></div>
+          <div class="dm-target t2" id="dmT2"><span class="tn">第二目标 · 阶梯降级</span><span class="tr">总分 9–15：争取降为恶势力或普通共同犯罪</span></div>
+          <div class="dm-target t3" id="dmT3"><span class="tn">第三目标 · 量刑与财产之辩</span><span class="tr">总分 ≥ 16：角色降档＋从宽情节＋阻击没收财产</span></div>
+        </div>
+        <div class="dm-hardrule" id="dmHardRule">⚑ 硬规则触发：当前存在特征整体为 0 分，依法不能认定黑社会性质组织——无论总分多少，第一目标优先。</div>
+      </div>
+
+      <div class="dm-reader" id="dmReader">
+        <div class="dm-reader-bar">
+          <span class="rt">成品全文 · defense-gang-crime.md（v2，12 节完整版）</span>
+          <span class="rs" id="dmReaderStat">全文与第四章 4.2 同源，改动只维护一处</span>
+          <button class="dm-reader-btn" id="dmReaderToggle" type="button">▸ 展开阅读全文</button>
+          <button class="dm-reader-btn" id="dmReaderCopy" type="button">复制全文</button>
+          <button class="dm-reader-btn" id="dmReaderDownload" type="button">⬇ 下载 .md</button>
+        </div>
+        <div class="dm-reader-body" id="dmReaderBody"></div>
+      </div>
+
+      <div class="dm-reuse">
+        <div class="step"><b><span class="no2">1</span>拿走</b>点「下载 .md」得到 defense-gang-crime.md，或复制全文存到 opencode 全局技能目录 / 案件文件夹的 AGENTS.md。</div>
+        <div class="step"><b><span class="no2">2</span>换罪名</b>保留作业框架（三级目标、四栏攻防、评分表、五道门禁），把四特征换成目标罪名要件，替换第二、六、十一节的法源与个罪库。</div>
+        <div class="step"><b><span class="no2">3</span>持续养</b>每办完一个同类案件，把新反制点、新法源、踩过的坑回填对应小节；法源引用前一律回权威库复核时效。</div>
+      </div>
+
+      <div class="dm-bridge">这就是第四章 L2 的完整成品 → <a href="#ch4">回到 4.2 查看可直接复制的 Skill 全文模板</a>，换要件即可复用到其他罪名。</div>
+    </div>
+  </div>
+
+  <h3>9.1 把这套流程发给 AI：整段复制的投喂指令</h3>
+  <p class="dm-prompt-intro">下面这段指令就是现场演示的“剧本”，把它连同你的任务要求整段发给 AI，即可复现全过程；13 个链接已全部填好，作者与篇名与微信原文一致。</p>
+<pre># 任务：制作“涉黑社会性质组织犯罪刑事辩护”专属 Skill
+
+## 一、你的角色
+你是刑事辩护研究助手。请先通读下列 13 篇专业文章（作者均为白雁军、张飞虎，
+首发于山西华炬律师事务所公众号“法悟｜扫黑除恶解读”系列），再结合法律法规、
+立法解释、司法解释与权威案例，产出一份可长期复用的罪名辩护 Skill 文件
+（Markdown，文件名 defense-gang-crime.md）。
+
+## 二、专业文章素材（逐篇打开精读，禁止只看标题臆测）
+# —— 黑社会性质组织四特征 ——
+1. 扫黑除恶解读（一）·组织特征
+   https://mp.weixin.qq.com/s/dxjO03-lDs6BXLpIQSZk5w
+2. 扫黑除恶解读（二）·经济特征
+   https://mp.weixin.qq.com/s/ErkgC7Oll-TOqH1Mp_8SgQ
+3. 扫黑除恶解读（三）·行为特征
+   https://mp.weixin.qq.com/s/6Jbgt2ZSdYnth1FiXXdfaQ
+# —— 恶势力 ——
+4. 扫黑除恶解读（五）·“恶势力”的认定
+   https://mp.weixin.qq.com/s/6bTgcuFT2YS_k04IuZ-hMA
+# —— 十类新型黑恶犯罪 ——
+5. 扫黑除恶解读（六）·软暴力催收
+   https://mp.weixin.qq.com/s/FQo-LLTjYLXKGvzch5Jc5Q
+6. 扫黑除恶解读（七）·恶意索赔
+   https://mp.weixin.qq.com/s/n2kgwbi7v9Na1xoECIBz1g
+7. 扫黑除恶解读（八）·舆情敲诈
+   https://mp.weixin.qq.com/s/3rlEnyvBXtyn36UB2s7y_A
+8. 扫黑除恶解读（九）·务工敲诈
+   https://mp.weixin.qq.com/s/od0bvypi7fHsQu9C5vnlxw
+9. 扫黑除恶解读（十）·碰瓷敲诈
+   https://mp.weixin.qq.com/s/tNbfaU6FAby8POaVDtOKXA
+10. 扫黑除恶解读（十一）·强迫消费
+    https://mp.weixin.qq.com/s/LmzB7f-6H6pJOhUgRLgLCg
+11. 扫黑除恶解读（十二）·色情敲诈
+    https://mp.weixin.qq.com/s/RZxgT6GoKIfrcOUY2XzC-w
+12. 扫黑除恶解读（十三）·裸聊敲诈
+    https://mp.weixin.qq.com/s/JhAFC80-g4LBuUhQyhMsBA
+13. 扫黑除恶解读（十五）·网络暴力
+    https://mp.weixin.qq.com/s/-RvTuunZuHWept2z3lvdMQ
+
+## 三、作业要求
+1. 分两阶段：阶段一只读不写，逐篇输出要点（控方常见命题、辩方反制点、
+   典型案例、引用的法源），每篇标注来源链接；我确认无遗漏后再进入阶段二写作；
+2. 文章中未覆盖的“非法控制（危害性）特征”，必须显式指出缺口，
+   并通过权威法源补全，不得静默略过；
+3. 所有法条、立法解释、司法解释、纪要与指导意见，一律通过权威法律数据库
+   （如元典 MCP）核验现行有效性、条号与施行日期，按 A/B/C 三级管理：
+   A 级=已核验现行有效可直接引用；B 级=权威文件但引用前须再复核版本；
+   C 级=文章与案例，只能作说理素材，不能单独作为法律依据；
+4. 核验不通过或拿不准的，写入《待核实清单》标“待核”，禁止编造条号、案号；
+5. 四特征（组织、经济、行为、非法控制）每个特征固定输出四栏：
+   ①控方命题 ②卷宗证据审查（标注【代号文件名+页码】）③我方反制点 ④待补强；
+6. 写作前必须展示推理过程，不许直接抛结论，依次完成四个子步并留痕：
+   6.1 要件拆解树：把法定要件拆成可逐项攻防的审查节点，每个节点挂法源坐标；
+   6.2 证据印证：按刑事诉讼印证规则，把每份证据归位到要件节点，
+       标注“印证/反向印证/部分印证/矛盾待查/缺口”，矛盾点不得择一采信；
+   6.3 控辩对抗推演：先替控方证成命题，再站辩方逐环拆解，
+       每个剔除/剥离动作写明依据（卷宗页码或法源条文），最后给出结论置信度，
+       拿不准的登记为“待核”，禁止硬下结论；
+   6.4 汇总成文：推理结论收敛为四栏矩阵，再写入 Markdown，
+       每条观点带法源或出处角标，文末统计攻防单元数、出处数、待核项数；
+7. Skill 必须覆盖完整辩护链，不得只做无罪之辩，按三级目标顺位展开：
+   7.1 三级辩护目标：第一目标无罪/不按黑社会处理，第二目标阶梯降级，
+       第三目标量刑与财产之辩，并说明触发各目标的判断条件；写明资深律师的
+       策略辩证法（大局优先、同案分辩、可接受的妥协、程序与实体并行）；
+   7.2 阶梯降级：制作“黑社会—恶势力犯罪集团—恶势力团伙—普通共同犯罪—
+       个人/单位行为”五层区分表，每档写明组织程度、人数稳定性、经济特征、
+       非法控制、法律后果差异，降级论证要落到具体刑期与财产刑差异；
+   7.3 涉黑特殊程序：写清会见权规则（涉黑不在刑诉法第39条须经许可的两类
+       案件之列，破除“涉黑会见要审批”误区）、37 天黄金救援作战表、
+       羁押必要性审查、非法证据排除、技术侦查与电子数据、管辖并案分案、
+       认罪认罚对定性保留异议的打法；
+   7.4 涉案财产处置：依据《反有组织犯罪法》第四章，写权属四分类、无关财物
+       3 日解除、等值没收前提、案外人救济、先行处置审查与举证责任边界；
+   7.5 控方套路反制清单：总结包装组织特征、注水经济特征、凑多次行为、
+       软暴力扩大化、标签反推个案、虚化非法控制、口供中心主义等常见套路，
+       每个套路配具体反制动作，形成可传承的“坑点地图”；
+   7.6 量刑辩护：逐项核查角色区分、从犯/胁从、自首坦白、立功、认罪认罚、
+       退赃谅解、累犯/特别再犯、缓刑空间，并按案发地量刑指导意见给出
+       起点刑→基准刑→调节刑的完整计算过程，数字一律回原文核验；
+   7.7 关联个罪辩点库：对寻衅滋事、催收非法债务、敲诈勒索、强迫交易、
+       侵犯公民个人信息、网络暴力相关罪名，每个输出入罪要件、证据对应表、
+       3 个以上辩护切口、时效与既判力审查，数额标准提示按案发地核验；
+   7.8 文书模板库：提供不予批捕意见、排非申请、羁押必要性审查、财产解除
+       异议、重新鉴定申请、定性/量刑辩护词、类案检索报告的固定骨架；
+   7.9 量化评分表：四特征各拆 3 子项共 12 项，按成立 2/存疑 1/不成立 0 赋分，
+       写明三档分数线对应三级目标，并声明“任一特征整体不成立即不能认定黑社会”
+       的硬规则，评分仅用于内部与客户沟通；
+   7.10 执业风险红线：写明不帮助串供伪证、不承诺结果、刑事风险代理限制、
+        案卷保管与隐私保护、AI 成果须律师终审；
+8. 第 0 步必须写数据合规前置：真实卷宗先本机脱敏为代号、词典不出本机，
+   Skill 内一律使用【人员A】【地点甲】等代号，不索取真实身份信息；
+9. 成品结构（16 节）：数据合规前置 / 角色与三级目标 / 罪名谱系与从严从宽地图 /
+   四特征攻防（含裁判规则层）/ 阶梯降级 / 涉黑特殊程序 / 证据法工具箱 /
+   涉案财产处置 / 控方套路反制 / 量刑辩护 / 关联个罪库 / 37天作战表与SOP /
+   量化评分表 / 文书模板库 / 法源分级清单 / 输出门禁与执业风险；
+10. 落盘前自检五道门禁：法条时效、出处闭环、缺口显性化、数据合规、
+    人工终审声明，任一不过则退回修改并报告原因；
+11. 每轮开头三行头汇报：【当前子任务】【完成状态：已读材料 x/13】【下一步】。</pre>
+  <div class="box tip"><span class="t">换罪名怎么复用</span>保留这份指令的作业框架（两阶段、四栏输出、法源三级、复核门禁），把文章链接和“四特征”换成目标罪名的要件与素材即可——这正是 L4“拆到指令足够明确”的落地方式。</div>
+</section>
+
+<footer>
+  山西华炬律师事务所 · 月度例会分享手册 · 2026-11-06<br>
+  本手册所有密钥均为占位符；配置与脚本请在本人设备上使用，并遵守各平台服务协议与职业伦理要求。
+</footer>
+
+</div>
+
+<script>
+function copyText(text, onDone){
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(onDone).catch(function(){ fallbackCopy(text, onDone); });
+  } else { fallbackCopy(text, onDone); }
+}
+function fallbackCopy(text, onDone){
+  var ta=document.createElement('textarea');ta.value=text;
+  ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);
+  ta.select();
+  try{ document.execCommand('copy'); onDone(); }catch(e){}
+  document.body.removeChild(ta);
+}
+function flashBtn(btn, doneText){
+  var old=btn.textContent;btn.textContent=doneText;btn.classList.add('done');
+  setTimeout(function(){btn.textContent=old;btn.classList.remove('done');},1600);
+}
+document.querySelectorAll('pre').forEach(function(pre){
+  var btn=document.createElement('button');
+  btn.className='copybtn';btn.textContent='复制';
+  btn.addEventListener('click',function(){
+    var raw = pre.innerText || pre.textContent;
+    copyText(raw.replace(/^复制\r?\n/,''), function(){ flashBtn(btn,'已复制 ✓'); });
+  });
+  pre.appendChild(btn);
+});
+
+/* ===== 第九章：Skill 制作演示状态机 ===== */
+(function(){
+  var demo = document.getElementById('dmDemo');
+  if(!demo) return;
+  var stages = Array.prototype.slice.call(demo.querySelectorAll('.dm-stage'));
+  var dots = Array.prototype.slice.call(demo.querySelectorAll('.dm-dot'));
+  var playBtn = document.getElementById('dmPlay');
+  var resetBtn = document.getElementById('dmReset');
+  var progress = document.getElementById('dmProgress');
+  var counter1 = document.getElementById('dmCounter1');
+  var articles = Array.prototype.slice.call(demo.querySelectorAll('#dmArticles .dm-art'));
+  var screen = document.getElementById('dmScreen');
+  var vrows = Array.prototype.slice.call(demo.querySelectorAll('#dmVerify .dm-vrow'));
+  var mcells = Array.prototype.slice.call(demo.querySelectorAll('#dmMatrix td'));
+  var fileCard = document.getElementById('dmFile');
+  var tocItems = Array.prototype.slice.call(demo.querySelectorAll('#dmToc li'));
+  var gapNote = document.getElementById('dmGapNote');
+  var fillNote = document.getElementById('dmFillNote');
+  var subtabs = Array.prototype.slice.call(demo.querySelectorAll('#dmSubtabs .dm-subtab'));
+  var subpanes = Array.prototype.slice.call(demo.querySelectorAll('.dm-subpane'));
+  var treeLeaves = Array.prototype.slice.call(demo.querySelectorAll('#dmTree .leaf'));
+  var evCells = Array.prototype.slice.call(demo.querySelectorAll('#dmEvtable td'));
+  var reasonBox = document.getElementById('dmReason');
+  var conclBox = document.getElementById('dmConcl');
+  var codeBox = document.getElementById('dmCodegen');
+  var genDone = document.getElementById('dmGenDone');
+  var gateRows = Array.prototype.slice.call(demo.querySelectorAll('#dmGate .dm-vrow'));
+
+  var REASON_LINES = [
+    '<span class="hd">▶ 第一步：先替控方把命题证成（先立）</span>',
+    '<span class="dim">控方命题：</span>该组织 3 年内实施 13 起违法犯罪，符合“有组织地多次进行违法犯罪活动”',
+    '<span class="dim">举证路径：</span>逐案清单 + 共同成员重合 + 均以组织名义实施 → 指向组织意志支配',
+    '',
+    '<span class="hd">▶ 第二步：辩方按要件逐环拆解（后破）</span>',
+    '<span class="indent">环1 · 多次性计数：</span><span class="warn">第7起已过追诉时效、第11起已受治安处罚 → 依法剔除，13 起降为 11 起</span>',
+    '<span class="indent">环2 · 组织性识别：</span>对照 2018 意见五种情形，第2/5/9 起系成员个人恩怨、非为组织利益 → <span class="warn">剥离为个人行为，再降为 8 起</span>',
+    '<span class="indent">环3 · 手段性质：</span>第4起“讨债”微信记录无威胁用语、未形成心理强制，不满足软暴力四要件（手段/心理强制/不法目的/相当性）→ <span class="warn">该起不能计入</span>',
+    '<span class="indent">环4 · 禁止反向推定：</span>其余个案若证据不足，不能靠“黑社会”标签反推具体罪名成立 <span class="blue">【2009纪要】</span>',
+    '',
+    '<span class="hd">▶ 第三步：置信度评估与待核登记</span>',
+    '<span class="ok">结论置信度：高</span> —— 每个剔除/剥离动作均指向卷宗页码或法源条文',
+    '<span class="warn">待核 2 项：</span>第7起追诉时效起算点需核对立案决定书；第11起治安处罚决定书原件待调取',
+    '<span class="dim">规则遵守：</span>拿不准不硬下结论，写入《待核实清单》，交人工终审 <span class="dm-caret"></span>'
+  ];
+
+  var CODE_LINES = [
+    '<span class="cmt"># defense-gang-crime.md v3 · 由推理结论流式生成（演示片段）</span>',
+    '<span class="h1">## 五、涉黑特殊程序辩护</span>',
+    '<span class="cmt"># 先破除误区：涉黑不在刑诉法39条“须经许可会见”的两类案件之列</span>',
+    '- <span class="kw">会见权：</span>持三证会见，看守所 48 小时内安排；以“专案组不让见”拖延的，提申诉控告 <span class="cite">[刑诉法第39条]</span>',
+    '- <span class="kw">37天窗口：</span>刑拘30天+批捕7天，第26–37天连续提交不批捕意见 <span class="cite">[刑诉法第95/97条]</span>',
+    '',
+    '<span class="h1">## 八、控方套路反制（坑点地图）</span>',
+    '- <span class="kw">套路“注水经济特征”：</span>做合法收入占比审计，剥离个人消费与正常经营支出 <span class="cite">[审计报告 p5]</span>',
+    '- <span class="kw">套路“凑多次行为”：</span>过时效、已治安处罚、民事纠纷事实逐笔剔除，13 起→8 起',
+    '',
+    '<span class="h1">## 九、量刑辩护</span>',
+    '- <span class="kw">从严排除：</span>一般参加者不适用反有组织犯罪法第22条取保/缓刑从严 <span class="cite">[反有组织犯罪法第22条]</span>',
+    '- <span class="kw">配合从宽：</span>一般参加者提供组织线索可援引第33条从宽，组织者领导者严格适用 <span class="cite">[反有组织犯罪法第33条]</span>',
+    '- <span class="kw">量刑计算：</span>起点刑2年→自首减30%→从犯减20%→调节刑1.12年，建议缓刑 <span class="cite">[量刑指导意见]</span>',
+    '',
+    '<span class="h1">## 十二、量化评分结论</span>',
+    '- 评分 11/24，无特征 0 分 → 命中第二目标（阶梯降级），同步预备第三目标量刑方案',
+    '<span class="cmt"># 自检：特殊程序/套路反制/财产/量刑模块出处齐全，待核 3 项已登记 → 五道门禁通过 ✓</span>'
+  ];
+
+  /* 四特征量化评分表数据与交互 */
+  var SCORE_GROUPS = [
+    { name: '组织特征', items: ['组织稳定性（存续时间、核心成员）', '规模性（人数较多，不搞一刀切）', '结构性（组织者/领导者/骨干基本固定）'] },
+    { name: '经济特征', items: ['有组织获取经济利益（合法收入已剥离）', '具备一定经济实力（无数额一刀切）', '利益实际用于支持组织活动'] },
+    { name: '行为特征', items: ['暴力威胁或其他手段（含软暴力四要件）', '有组织地多次违法犯罪（三次以上且含犯罪）', '为非作恶、欺压残害群众'] },
+    { name: '非法控制特征', items: ['“一定区域/行业”具体可证', '达到非法控制或心理强制程度', '严重破坏经济社会生活秩序'] }
+  ];
+  var scoreGroupsBox = document.getElementById('dmScoreGroups');
+  var scoreVal = document.getElementById('dmScoreVal');
+  var scoreBar = document.getElementById('dmScoreBar');
+  var scoreReset = document.getElementById('dmScoreReset');
+  var hardRule = document.getElementById('dmHardRule');
+  var t1 = document.getElementById('dmT1'), t2 = document.getElementById('dmT2'), t3 = document.getElementById('dmT3');
+
+  function buildScorer(){
+    if(!scoreGroupsBox) return;
+    scoreGroupsBox.innerHTML = '';
+    SCORE_GROUPS.forEach(function(g, gi){
+      var box = document.createElement('div');
+      box.className = 'dm-score-group';
+      var html = '<div class="gt">' + g.name + '<span class="gscore" id="dmGs' + gi + '">0 分</span></div>';
+      g.items.forEach(function(q, qi){
+        var name = 'dmr' + gi + '_' + qi;
+        html += '<div class="dm-score-item"><span class="q">' + q + '</span><span class="seg">'
+          + '<input type="radio" name="' + name + '" value="0" id="' + name + '0"><label data-v="0" for="' + name + '0">不成立 0</label>'
+          + '<input type="radio" name="' + name + '" value="1" id="' + name + '1"><label data-v="1" for="' + name + '1">存疑 1</label>'
+          + '<input type="radio" name="' + name + '" value="2" id="' + name + '2"><label data-v="2" for="' + name + '2">成立 2</label>'
+          + '</span></div>';
+      });
+      box.innerHTML = html;
+      scoreGroupsBox.appendChild(box);
+    });
+    scoreGroupsBox.addEventListener('change', refreshScore);
+    if(scoreReset) scoreReset.addEventListener('click', function(){
+      scoreGroupsBox.querySelectorAll('input:checked').forEach(function(i){ i.checked = false; });
+      refreshScore();
+    });
+    refreshScore();
+  }
+
+  function refreshScore(){
+    if(!scoreGroupsBox) return;
+    var total = 0;
+    var groupScores = [0,0,0,0];
+    SCORE_GROUPS.forEach(function(g, gi){
+      var gs = 0;
+      g.items.forEach(function(q, qi){
+        var checked = scoreGroupsBox.querySelector('input[name="dmr' + gi + '_' + qi + '"]:checked');
+        if(checked) gs += parseInt(checked.value, 10);
+      });
+      groupScores[gi] = gs;
+      var el = document.getElementById('dmGs' + gi);
+      if(el) el.textContent = gs + ' 分';
+      total += gs;
+    });
+    scoreVal.textContent = total;
+    scoreBar.style.width = (total / 24 * 100) + '%';
+    var answered = scoreGroupsBox.querySelectorAll('input:checked').length;
+    var hasZeroFeature = groupScores.some(function(v){ return v === 0; }) && answered > 0;
+    t1.classList.toggle('active', answered > 0 && total <= 8 && groupScores.some(function(v){ return v === 0; }));
+    t2.classList.toggle('active', answered > 0 && total >= 9 && total <= 15);
+    t3.classList.toggle('active', answered > 0 && total >= 16);
+    hardRule.classList.toggle('show', hasZeroFeature);
+  }
+
+  var timers = [];
+  var current = 0;
+  var playing = false;
+
+  var LOGS = [
+    '<span class="dim">$</span> opencode run --skill build defense-gang-crime',
+    '<span class="gold">【当前子任务】</span>阶段一 · 深读 13 篇《法悟｜扫黑除恶解读》',
+    '<span class="dim">已读 1/13</span> 解读（一）组织特征 → 提炼：组织稳定性 / 规模性 / 结构性 3 组要素',
+    '<span class="dim">已读 2/13</span> 解读（二）经济特征 → 提炼：经济利益 / 获利手段 / 经济实力与支持组织活动',
+    '<span class="dim">已读 3/13</span> 解读（三）行为特征 → 提炼：暴力威胁与“其他手段” / 有组织 / 多次性',
+    '<span class="dim">已读 4/13</span> 解读（五）恶势力 → 提炼：纠集者+成员、三人以上、恶势力与黑社会界限',
+    '<span class="dim">已读 5–13/13</span> 九类新型黑恶（软暴力催收、恶意索赔、舆情/务工/碰瓷敲诈、强迫消费、色情/裸聊敲诈、网络暴力）',
+    '<span class="ok">✔ 深读完成：13/13，已自检无跳读、无抽样</span>',
+    '<span class="gold">【完成状态】</span>共提炼控方命题 4 组 · 反制点 32 项 · 典型案例 18 个；发现缺口：非法控制特征无专文',
+    '<span class="warn">【下一步】</span>接入元典 MCP 权威库，核验法源时效与条号并补全缺口<span class="dm-caret"></span>'
+  ];
+
+  function clearTimers(){ timers.forEach(clearTimeout); timers = []; }
+  function later(fn, ms){ var t = setTimeout(fn, ms); timers.push(t); }
+
+  function resetReveals(){
+    articles.forEach(function(el){ el.classList.remove('show'); });
+    vrows.forEach(function(el){ el.classList.remove('show','verified'); el.querySelector('.st').className='st loading'; el.querySelector('.st').textContent='待核验'; el.querySelector('.ck').textContent='···'; });
+    mcells.forEach(function(el){ el.classList.remove('show'); });
+    tocItems.forEach(function(el){ el.classList.remove('show'); });
+    [fileCard, gapNote, fillNote, conclBox, genDone].forEach(function(el){ if(el) el.style.opacity = '0'; });
+    if(conclBox) conclBox.classList.remove('show');
+    if(genDone) genDone.classList.remove('show');
+    screen.innerHTML = '';
+    if(reasonBox) reasonBox.innerHTML = '';
+    if(codeBox) codeBox.innerHTML = '';
+    treeLeaves.forEach(function(el){ el.classList.remove('show'); });
+    evCells.forEach(function(el){ el.classList.remove('show'); });
+    gateRows.forEach(function(el){ el.classList.remove('show','verified'); el.querySelector('.st').className='st loading'; el.querySelector('.st').textContent='自检中'; el.querySelector('.ck').textContent='···'; });
+    setSub(0);
+    if(counter1) counter1.textContent = '0 / 13';
+  }
+
+  function setSub(i){
+    subtabs.forEach(function(el, k){ el.classList.toggle('active', k === i); });
+    subpanes.forEach(function(el, k){ el.classList.toggle('active', k === i); });
+  }
+
+  function updateChrome(doScroll){
+    stages.forEach(function(el, i){ el.classList.toggle('active', i === current); });
+    dots.forEach(function(el, i){
+      el.classList.toggle('active', i === current);
+      el.classList.toggle('done', i < current);
+    });
+    progress.style.width = ((current + (playing ? 0 : 1)) / stages.length * 100) + '%';
+    playBtn.textContent = playing ? '⏸ 暂停' : '▶ 自动播放';
+    if(doScroll){
+      var active = stages[current];
+      if(active && active.scrollIntoView){
+        setTimeout(function(){ active.scrollIntoView({behavior:'smooth', block:'nearest'}); }, 80);
+      }
+    }
+  }
+
+  function enterStage(idx){
+    current = idx;
+    clearTimers();
+    resetReveals();
+    updateChrome(true);
+    if(idx === 0) runStage0();
+    else if(idx === 1) runStage1();
+    else if(idx === 2) runStage2();
+    else if(idx === 3) runStage3();
+    else runStage4();
+  }
+
+  function showStageStatic(idx){
+    current = idx;
+    clearTimers();
+    resetReveals();
+    articles.forEach(function(el){ el.classList.add('show'); });
+    counter1.textContent = '13 / 13';
+    gapNote.style.opacity = '1';
+    LOGS.forEach(function(line){
+      var p = document.createElement('div');
+      p.className = 'dm-log show';
+      p.innerHTML = line;
+      screen.appendChild(p);
+    });
+    vrows.forEach(function(row){
+      row.classList.add('show','verified');
+      var st = row.querySelector('.st');
+      st.className = 'st ok'; st.textContent = '✔ 已核验';
+      row.querySelector('.ck').textContent = '现行有效';
+    });
+    fillNote.style.opacity = '1';
+    mcells.forEach(function(cell){ cell.classList.add('show'); });
+    treeLeaves.forEach(function(el){ el.classList.add('show'); });
+    evCells.forEach(function(el){ el.classList.add('show'); });
+    REASON_LINES.forEach(function(line){
+      var p = document.createElement('div');
+      p.className = 'dm-rline show';
+      p.innerHTML = line;
+      reasonBox.appendChild(p);
+    });
+    conclBox.classList.add('show'); conclBox.style.opacity = '1';
+    CODE_LINES.forEach(function(line){
+      var p = document.createElement('div');
+      p.className = 'dm-codeline show';
+      p.innerHTML = line;
+      codeBox.appendChild(p);
+    });
+    genDone.classList.add('show'); genDone.style.opacity = '1';
+    gateRows.forEach(function(row){
+      row.classList.add('show','verified');
+      var st = row.querySelector('.st');
+      st.className = 'st ok'; st.textContent = '✔ 通过';
+      row.querySelector('.ck').textContent = '已记录';
+    });
+    fileCard.classList.add('show'); fileCard.style.opacity = '1';
+    tocItems.forEach(function(el){ el.classList.add('show'); });
+    updateChrome(true);
+  }
+
+  function runStage0(){
+    articles.forEach(function(el, i){
+      later(function(){
+        el.classList.add('show');
+        counter1.textContent = (i + 1) + ' / 13';
+      }, 350 * (i + 1));
+    });
+    later(function(){ gapNote.style.opacity = '1'; }, 350 * (articles.length + 1));
+    later(nextStage, 350 * (articles.length + 2) + 500);
+  }
+
+  function runStage1(){
+    LOGS.forEach(function(line, i){
+      later(function(){
+        var p = document.createElement('div');
+        p.className = 'dm-log';
+        p.innerHTML = line;
+        screen.appendChild(p);
+        requestAnimationFrame(function(){ p.classList.add('show'); });
+        screen.scrollTop = screen.scrollHeight;
+      }, 650 * (i + 1));
+    });
+    later(nextStage, 650 * (LOGS.length + 1) + 400);
+  }
+
+  function runStage2(){
+    vrows.forEach(function(row, i){
+      later(function(){
+        row.classList.add('show');
+      }, 300 * (i * 2 + 1));
+      later(function(){
+        row.classList.add('verified');
+        var st = row.querySelector('.st');
+        st.className = 'st ok'; st.textContent = '✔ 已核验';
+        row.querySelector('.ck').textContent = '现行有效';
+      }, 300 * (i * 2 + 2));
+    });
+    later(function(){ fillNote.style.opacity = '1'; }, 300 * (vrows.length * 2 + 1));
+    later(nextStage, 300 * (vrows.length * 2 + 2) + 600);
+  }
+
+  function runStage3(){
+    var t = 300;
+    var STEP_GAP = 900;
+    /* 子步 4.1 要件树 */
+    setSub(0);
+    treeLeaves.forEach(function(el, i){
+      later(function(){ el.classList.add('show'); }, t + 320 * (i + 1));
+    });
+    t += 320 * (treeLeaves.length + 1) + STEP_GAP;
+    /* 子步 4.2 证据印证表 */
+    later(function(){ setSub(1); }, t);
+    t += 500;
+    evCells.forEach(function(el, i){
+      later(function(){ el.classList.add('show'); }, t + 180 * (i + 1));
+    });
+    t += 180 * (evCells.length + 1) + STEP_GAP;
+    /* 子步 4.3 对抗推演思维流 */
+    later(function(){ setSub(2); }, t);
+    t += 500;
+    REASON_LINES.forEach(function(line, i){
+      later(function(){
+        var p = document.createElement('div');
+        p.className = 'dm-rline';
+        p.innerHTML = line;
+        reasonBox.appendChild(p);
+        requestAnimationFrame(function(){ p.classList.add('show'); });
+        reasonBox.scrollTop = reasonBox.scrollHeight;
+      }, t + 520 * (i + 1));
+    });
+    t += 520 * (REASON_LINES.length + 1);
+    later(function(){ conclBox.classList.add('show'); conclBox.style.opacity = '1'; }, t);
+    t += 1100;
+    /* 子步 4.4 矩阵 + 流式写文件 */
+    later(function(){ setSub(3); }, t);
+    t += 500;
+    mcells.forEach(function(cell, i){
+      later(function(){ cell.classList.add('show'); }, t + 130 * (i + 1));
+    });
+    t += 130 * (mcells.length + 1) + 400;
+    CODE_LINES.forEach(function(line, i){
+      later(function(){
+        var p = document.createElement('div');
+        p.className = 'dm-codeline';
+        p.innerHTML = line;
+        codeBox.appendChild(p);
+        requestAnimationFrame(function(){ p.classList.add('show'); });
+        codeBox.scrollTop = codeBox.scrollHeight;
+      }, t + 360 * (i + 1));
+    });
+    t += 360 * (CODE_LINES.length + 1);
+    later(function(){ genDone.classList.add('show'); genDone.style.opacity = '1'; }, t);
+    later(nextStage, t + 1300);
+  }
+
+  function runStage4(){
+    var t = 300;
+    gateRows.forEach(function(row, i){
+      later(function(){ row.classList.add('show'); }, t + 420 * (i * 2 + 1));
+      later(function(){
+        row.classList.add('verified');
+        var st = row.querySelector('.st');
+        st.className = 'st ok'; st.textContent = '✔ 通过';
+        row.querySelector('.ck').textContent = '已记录';
+      }, t + 420 * (i * 2 + 2));
+    });
+    t += 420 * (gateRows.length * 2 + 1);
+    later(function(){ fileCard.classList.add('show'); fileCard.style.opacity = '1'; }, t);
+    tocItems.forEach(function(el, i){
+      later(function(){ el.classList.add('show'); }, t + 320 * (i + 1));
+    });
+    later(function(){
+      if(playing){ playing = false; updateChrome(false); }
+    }, t + 320 * (tocItems.length + 1) + 500);
+  }
+
+  function nextStage(){
+    if(!playing) return;
+    if(current < stages.length - 1){ enterStage(current + 1); }
+    else { playing = false; updateChrome(false); }
+  }
+
+  function play(){
+    if(playing){
+      playing = false; clearTimers(); updateChrome(false); return;
+    }
+    playing = true;
+    enterStage(0);
+  }
+
+  playBtn.addEventListener('click', play);
+  resetBtn.addEventListener('click', function(){
+    playing = false; clearTimers(); showStageStatic(0);
+  });
+  dots.forEach(function(dot){
+    dot.addEventListener('click', function(){
+      playing = false; clearTimers();
+      showStageStatic(parseInt(dot.getAttribute('data-go'), 10));
+    });
+  });
+  subtabs.forEach(function(tab){
+    tab.addEventListener('click', function(){
+      playing = false; clearTimers();
+      var i = parseInt(tab.getAttribute('data-sub'), 10);
+      setSub(i);
+      treeLeaves.forEach(function(el){ el.classList.add('show'); });
+      evCells.forEach(function(el){ el.classList.add('show'); });
+      if(!reasonBox.children.length){
+        REASON_LINES.forEach(function(line){
+          var p = document.createElement('div');
+          p.className = 'dm-rline show';
+          p.innerHTML = line;
+          reasonBox.appendChild(p);
+        });
+      }
+      conclBox.classList.add('show'); conclBox.style.opacity = '1';
+      if(!codeBox.children.length){
+        CODE_LINES.forEach(function(line){
+          var p = document.createElement('div');
+          p.className = 'dm-codeline show';
+          p.innerHTML = line;
+          codeBox.appendChild(p);
+        });
+      }
+      mcells.forEach(function(cell){ cell.classList.add('show'); });
+      genDone.classList.add('show'); genDone.style.opacity = '1';
+    });
+  });
+
+  function buildReader(){
+    var reader = document.getElementById('dmReader');
+    if(!reader) return;
+    var src = document.getElementById('skillSource');
+    var body = document.getElementById('dmReaderBody');
+    var toggle = document.getElementById('dmReaderToggle');
+    var copyBtn = document.getElementById('dmReaderCopy');
+    var dlBtn = document.getElementById('dmReaderDownload');
+    if(!src || !body) return;
+    var clone = src.cloneNode(true);
+    clone.removeAttribute('id');
+    var innerBtn = clone.querySelector('.copybtn');
+    if(innerBtn) innerBtn.parentNode.removeChild(innerBtn);
+    body.appendChild(clone);
+
+    function getText(){ return (clone.innerText || clone.textContent).replace(/\s+$/,''); }
+    toggle.addEventListener('click', function(){
+      var open = reader.classList.toggle('open');
+      toggle.textContent = open ? '▾ 收起全文' : '▸ 展开阅读全文';
+      if(open){
+        reader.classList.add('dm-pulse');
+        setTimeout(function(){ reader.classList.remove('dm-pulse'); }, 3300);
+      }
+    });
+    copyBtn.addEventListener('click', function(){
+      copyText(getText(), function(){ flashBtn(copyBtn, '已复制 ✓'); });
+    });
+    dlBtn.addEventListener('click', function(){
+      var blob = new Blob([getText()], { type: 'text/markdown;charset=utf-8' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url; a.download = 'defense-gang-crime.md';
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+      flashBtn(dlBtn, '已下载 ✓');
+    });
+  }
+
+  buildScorer();
+  buildReader();
+  showStageStatic(0);
+})();
+</script>
+</body>
+</html>
