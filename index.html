@@ -121,6 +121,35 @@
   </div>
 </section>
 
+<!-- 报名 -->
+<section id="join" class="final">
+  <div class="wrap rise">
+    <h2 class="heading-3">下期分享，等你来</h2>
+    <p class="body-3 muted">一个提示词、一套流程、一个小工具都算。填下面这张表就行，一分钟搞定。</p>
+    <form class="signup" id="signup-form" novalidate>
+      <div class="row2">
+        <label><span class="title-4">姓名 *</span><input name="name" maxlength="20" required autocomplete="name"></label>
+        <label><span class="title-4">适用工具</span>
+          <select name="tools"><option>通用 Agent</option><option>Claude</option><option>WorkBuddy</option><option>网页版</option><option>其他</option></select>
+        </label>
+      </div>
+      <label><span class="title-4">要分享的技能 *</span><input name="skill" maxlength="60" required placeholder="例如：合同审查要点清单"></label>
+      <label><span class="title-4">一句话介绍</span><textarea name="intro" maxlength="200" placeholder="解决什么问题、大概能省多少时间"></textarea></label>
+      <label><span class="title-4">相关链接（可选）</span><input name="link" maxlength="300" placeholder="网盘、文档或演示视频地址"></label>
+      <input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <div class="actions">
+        <button type="submit" class="btn lg button-md" id="signup-btn">提交报名</button>
+        <span class="body-6" id="signup-msg" role="status"></span>
+      </div>
+      <p class="caption-5 quiet">提交后马上显示在下方，所有同事都能看到。需要修改或撤回，请联系平台维护人。技能材料可按 <a class="card-link" style="margin:0" href="downloads/skill-submission-template.zip">提交包模板</a> 整理后发给维护人。</p>
+    </form>
+    <div class="signups" aria-live="polite">
+      <h3 class="title-2" id="signup-count">已报名下期分享</h3>
+      <div class="signup-list" id="signup-list"></div>
+    </div>
+  </div>
+</section>
+
 <!-- How it works -->
 <section id="how">
   <div class="wrap">
@@ -182,34 +211,6 @@
   </div>
 </section>
 
-<!-- Final CTA -->
-<section id="join" class="final">
-  <div class="wrap rise">
-    <h2 class="heading-3">下期分享，等你来</h2>
-    <p class="body-3 muted">一个提示词、一套流程、一个小工具都算。填下面这张表就行，一分钟搞定。</p>
-    <form class="signup" id="signup-form" novalidate>
-      <div class="row2">
-        <label><span class="title-4">姓名 *</span><input name="name" maxlength="20" required autocomplete="name"></label>
-        <label><span class="title-4">适用工具</span>
-          <select name="tools"><option>通用 Agent</option><option>Claude</option><option>WorkBuddy</option><option>网页版</option><option>其他</option></select>
-        </label>
-      </div>
-      <label><span class="title-4">要分享的技能 *</span><input name="skill" maxlength="60" required placeholder="例如：合同审查要点清单"></label>
-      <label><span class="title-4">一句话介绍</span><textarea name="intro" maxlength="200" placeholder="解决什么问题、大概能省多少时间"></textarea></label>
-      <label><span class="title-4">相关链接（可选）</span><input name="link" maxlength="300" placeholder="网盘、文档或演示视频地址"></label>
-      <input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
-      <div class="actions">
-        <button type="submit" class="btn lg button-md" id="signup-btn">提交报名</button>
-        <span class="body-6" id="signup-msg" role="status"></span>
-      </div>
-      <p class="caption-5 quiet">提交后马上显示在下方，所有同事都能看到。需要修改或撤回，请联系平台维护人。技能材料可按 <a class="card-link" style="margin:0" href="downloads/skill-submission-template.zip">提交包模板</a> 整理后发给维护人。</p>
-    </form>
-    <div class="signups" aria-live="polite">
-      <h3 class="title-2" id="signup-count">已报名下期分享</h3>
-      <div class="signup-list" id="signup-list"></div>
-    </div>
-  </div>
-</section>
 </main>
 
 <footer>
