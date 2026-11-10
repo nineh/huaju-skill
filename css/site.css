@@ -172,3 +172,35 @@ footer p+p{margin-top:var(--s75)}
 .toc{list-style:none;padding:0!important}
 .card-link{display:inline-flex;align-items:center;gap:var(--s50);color:var(--accent);margin-top:var(--s75)}
 @media (max-width:900px){.doc{grid-template-columns:1fr}.side{position:static}.facts{grid-template-columns:1fr 1fr}}
+
+/* 作者署名 */
+.author{display:flex;align-items:center;gap:var(--s100)}
+.author .avatar{flex:none;width:32px;height:32px;border-radius:999px;background:var(--accent);color:#fff;display:grid;place-items:center;font-size:14px;line-height:20px;font-weight:600}
+.author-text{display:grid}
+.author.big{margin-top:var(--s300)}
+.author.big .avatar{width:40px;height:40px;font-size:16px;line-height:24px}
+.stall-item .by{color:var(--accent);margin-left:var(--s50)}
+.facts{grid-template-columns:repeat(auto-fit,minmax(160px,1fr))}
+
+/* 报名 */
+.signup{max-width:680px;margin:var(--s500) auto 0;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:var(--s300);display:grid;gap:var(--s200)}
+.signup .row2{display:grid;grid-template-columns:1fr 1fr;gap:var(--s200)}
+.signup label{display:grid;gap:var(--s50)}
+.signup input,.signup select,.signup textarea{font:inherit;font-size:16px;line-height:24px;padding:var(--s75) var(--s100);border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);width:100%}
+.signup textarea{resize:vertical;min-height:72px}
+.signup input:focus,.signup select:focus,.signup textarea:focus{outline:2px solid var(--accent);outline-offset:1px}
+.signup .hp{position:absolute;left:-9999px}
+.signup .actions{display:flex;align-items:center;gap:var(--s200);flex-wrap:wrap}
+.signup .err{color:#8A1C12}
+.signup .ok{color:#2E7D32}
+.signups{max-width:680px;margin:var(--s400) auto 0;text-align:left}
+.signups h3{margin-bottom:var(--s100)}
+.signup-list{display:grid;gap:var(--s100)}
+.signup-item{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:var(--s200);display:grid;gap:var(--s75)}
+.signup-item .top{display:flex;justify-content:space-between;align-items:center;gap:var(--s200)}
+.signup-item a{color:var(--accent);word-break:break-all}
+.skel{height:72px;border-radius:12px;background:linear-gradient(90deg,#EFEDEC,#F7F6F5,#EFEDEC);background-size:200% 100%;animation:sk 1.4s linear infinite}
+@keyframes sk{to{background-position:-200% 0}}
+@media (prefers-reduced-motion:reduce){.skel{animation:none}}
+@media (max-width:640px){.signup .row2{grid-template-columns:1fr}}
+.final .signup p,.final .signups p{max-width:none;margin:0}
