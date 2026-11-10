@@ -9,7 +9,12 @@
   var count = document.getElementById('signup-count');
   var ready = !!(cfg.SUPABASE_URL && cfg.SUPABASE_ANON_KEY);
   var api = ready ? cfg.SUPABASE_URL.replace(/\/$/, '') + '/rest/v1/signups' : '';
-  var headers = ready ? { apikey: cfg.SUPABASE_ANON_KEY, Authorization: 'Bearer ' + cfg.SUPABASE_ANON_KEY, 'Content-Type': 'application/json' } : {};
+  var headers = {};
+  if (ready) {
+    headers = { apikey: cfg.SUPABASE_ANON_KEY, 'Content-Type': 'application/json' };
+    // 旧版 anon key 是 JWT，需要同时放进 Authorization；新版 sb_publishable_ 密钥只放 apikey
+    if (!/^sb_publishable_/.test(cfg.SUPABASE_ANON_KEY)) headers.Authorization = 'Bearer ' + cfg.SUPABASE_ANON_KEY;
+  }
 
   function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
   function say(text, cls) { msg.textContent = text; msg.className = 'body-6 ' + (cls || ''); }
