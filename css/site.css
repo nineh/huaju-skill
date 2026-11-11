@@ -228,3 +228,16 @@ footer p+p{margin-top:var(--s75)}
 .rec-wrap > p{margin:0 auto}
 .rec-wrap .signup.rec{width:100%;margin:0 auto;text-align:left}
 .rec-wrap #rec-list{width:100%;text-align:left}
+
+/* 使用指南 */
+.flow{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;align-items:center;gap:var(--s200);margin-bottom:var(--s400)}
+.flow-box{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:var(--s200) var(--s300);display:grid;gap:var(--s50)}
+.flow-box.hot{border-color:var(--accent);background:var(--accent-soft)}
+.flow-box.hot .caption-3{color:var(--accent)}
+.flow-arrow{color:var(--ink-3);font-size:24px;line-height:32px}
+.principles{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s300);margin-top:var(--s500);padding-top:var(--s400);border-top:1px solid var(--line)}
+.principles > div{display:grid;gap:var(--s50)}
+.join-steps{max-width:960px;margin:var(--s500) auto 0;text-align:left}
+.eyebrow-plain{color:var(--accent);margin-bottom:var(--s100)}
+@media (max-width:900px){.flow{grid-template-columns:1fr}.flow-arrow{transform:rotate(90deg);justify-self:center}.principles{grid-template-columns:1fr}}
+.final .eyebrow-plain{margin:0 auto var(--s100);display:block}

@@ -10,7 +10,7 @@
 <link rel="icon" type="image/png" href="img/mark.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Noto+Sans+SC:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/site.css?v=202611111725">
+<link rel="stylesheet" href="css/site.css?v=202611111813">
 </head>
 <body>
 <a class="skip button-sm" href="#main">跳到正文</a>
@@ -21,12 +21,12 @@
     华炬 Skill 集市
   </a>
   <div class="nav-links title-4">
-    <a href="#skills">首期上架</a>
-    <a class="nav-hot" href="#external">外部精选<span class="nav-badge">新</span></a>
-    <a href="#how">怎么参加</a>
-    <a href="#faq">常见问题</a>
+    <a href="#skills">所内技能</a>
+    <a class="nav-hot" href="#external">开源技能<span class="nav-badge">新</span></a>
+    <a href="#tools">在线工具</a>
+    <a href="#guide">使用指南</a>
   </div>
-  <a class="btn button-sm" href="#join">报名下期分享</a>
+  <a class="btn button-sm" href="#join">报名分享</a>
 </nav>
 
 <main id="main">
@@ -38,14 +38,14 @@
       <h1 class="heading-2"><span class="nw">华炬律师的 AI 技能，</span><br><span class="nw">都在这里</span></h1>
       <p class="sub body-3 muted">律师自己做的 AI 技能和用法，放在这里共享。看到好用的直接拿走，做了新的也欢迎放上来。全部免费，目前仅对华炬同仁开放。</p>
       <div class="cta">
-        <a class="btn lg button-md" href="#join">报名下期分享
+        <a class="btn lg button-md" href="#skills">浏览技能
           <svg width="16" height="16" viewBox="0 0 256 256" aria-hidden="true"><path d="M221.7 133.7l-72 72a8 8 0 0 1-11.4-11.4L196.7 136H40a8 8 0 0 1 0-16h156.7l-58.4-58.3a8 8 0 0 1 11.4-11.4l72 72a8 8 0 0 1 0 11.4z" fill="currentColor"/></svg>
         </a>
-        <a class="title-4 muted" href="#skills">先看看首期 3 个技能</a>
+        <a class="title-4 muted" href="tools/paiban/index.html">打开在线排版</a>
       </div>
       <div class="proof caption-4 quiet">
         <svg width="16" height="16" viewBox="0 0 256 256" aria-hidden="true"><path d="M229.7 77.7l-128 128a8 8 0 0 1-11.4 0l-56-56a8 8 0 0 1 11.4-11.4L96 188.7 218.3 66.3a8 8 0 0 1 11.4 11.4z" fill="currentColor"/></svg>
-        首期例会已上架 3 个技能，覆盖报销、排版、模型使用三类场景
+        所内技能 3 个 · 开源技能 8 个 · 在线工具 1 个
       </div>
     </div>
 
@@ -77,12 +77,52 @@
   </div>
 </section>
 
-<!-- Skills -->
+<!-- 使用指南 -->
+<section id="guide">
+  <div class="wrap">
+    <div class="sec-head rise">
+      <h2 class="heading-4">Skill 是什么，怎么用</h2>
+      <p class="body-3 muted">Skill 就是把一套做事方法，写成 AI 能照着执行的说明书。它是一个文件夹，里面一份 SKILL.md，有时附带模板和脚本。装上之后跟 AI 说一句话，它就按这套方法干活。</p>
+    </div>
+    <div class="flow rise" aria-label="示意：材料经过 Skill 变成成果">
+      <div class="flow-box"><p class="caption-3 quiet">材料</p><p class="title-3">答辩状初稿.docx</p></div>
+      <span class="flow-arrow" aria-hidden="true">→</span>
+      <div class="flow-box hot"><p class="caption-3">Skill · 方法</p><p class="title-3">法律文书排版</p></div>
+      <span class="flow-arrow" aria-hidden="true">→</span>
+      <div class="flow-box"><p class="caption-3 quiet">成果</p><p class="title-3">排好版的文书，律师复核</p></div>
+    </div>
+    <div class="steps">
+      <div class="step rise">
+        <p class="n title-4">01</p>
+        <h3 class="title-2">下载技能包</h3>
+        <p class="body-6 muted">在下面的所内技能或开源技能里点"下载"，得到一个 zip，解压出技能文件夹。</p>
+      </div>
+      <div class="step rise">
+        <p class="n title-4">02</p>
+        <h3 class="title-2">装进你的 AI 助手</h3>
+        <p class="body-6 muted">WorkBuddy：把文件夹复制到 ~/.workbuddy/skills/。Claude：在设置的"技能"里上传 zip。其他 Agent 放进各自的技能目录。</p>
+      </div>
+      <div class="step rise">
+        <p class="n title-4">03</p>
+        <h3 class="title-2">说一句话就开工</h3>
+        <p class="body-6 muted">比如"按法律文书格式排一下这份答辩状"，AI 会自动调用对应的技能。不想装？先用在线工具。</p>
+      </div>
+    </div>
+    <div class="principles rise">
+      <div><p class="title-3">方法公开</p><p class="body-6 muted">每个技能的 SKILL.md 都能直接打开读，知道 AI 照着什么在做。</p></div>
+      <div><p class="title-3">律师复核</p><p class="body-6 muted">AI 给的是工作初稿，法条、案例和结论由律师核对后再用。</p></div>
+      <div><p class="title-3">先脱敏</p><p class="body-6 muted">发给云端模型前，先去掉当事人和案号等信息，可以用开源技能里的"文件脱敏"。</p></div>
+    </div>
+  </div>
+</section>
+
+
+<!-- 所内技能 -->
 <section id="skills">
   <div class="wrap">
     <div class="sec-head rise">
-      <h2 class="heading-4">首期上架：3 个技能</h2>
-      <p class="body-3 muted">来自第 1 期例会的现场分享。每个技能都写明解决什么问题、在哪用、怎么装。</p>
+      <h2 class="heading-4">所内技能</h2>
+      <p class="body-3 muted">华炬同仁自己做、自己用过的技能，来自每月例会的分享。</p>
     </div>
     <div class="cards">
       <article class="card rise">
@@ -122,40 +162,34 @@
   </div>
 </section>
 
-<!-- 报名 -->
-<section id="join" class="final">
-  <div class="wrap rise">
-    <h2 class="heading-3">下期分享，等你来</h2>
-    <p class="body-3 muted">一个提示词、一套流程、一个小工具都算。填下面这张表就行，一分钟搞定。</p>
-    <form class="signup" id="signup-form" novalidate>
-      <div class="row2">
-        <label><span class="title-4">姓名 *</span><input name="name" maxlength="20" required autocomplete="name"></label>
-        <label><span class="title-4">适用工具</span>
-          <select name="tools"><option>通用 Agent</option><option>Claude</option><option>WorkBuddy</option><option>网页版</option><option>其他</option></select>
-        </label>
+<!-- 在线工具 -->
+<section id="tools" aria-labelledby="tool-title">
+  <div class="wrap">
+    <div class="sec-head rise">
+      <h2 class="heading-4">在线工具</h2>
+      <p class="body-3 muted">不用安装，打开网页就能用。文件只在你的浏览器里处理。</p>
+    </div>
+    <div class="tool rise">
+      <div>
+        <span class="tag caption-3">已上线</span>
+        <h2 id="tool-title" class="heading-4" style="margin-top:16px">在线排版：打开网页就能用</h2>
+        <p class="body-3 muted" style="margin-top:16px">不用装 Python，不用敲命令。拖入 Word 文档，选格式，下载排好的新文件。</p>
+        <a class="btn lg button-md" style="margin-top:24px" href="tools/paiban/index.html">打开在线排版</a>
       </div>
-      <label><span class="title-4">要分享的技能 *</span><input name="skill" maxlength="60" required placeholder="例如：合同审查要点清单"></label>
-      <label><span class="title-4">一句话介绍</span><textarea name="intro" maxlength="200" placeholder="解决什么问题、大概能省多少时间"></textarea></label>
-      <label><span class="title-4">相关链接（可选）</span><input name="link" maxlength="300" placeholder="网盘、文档或演示视频地址"></label>
-      <input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
-      <div class="actions">
-        <button type="submit" class="btn lg button-md" id="signup-btn">提交报名</button>
-        <span class="body-6" id="signup-msg" role="status"></span>
-      </div>
-      <p class="caption-5 quiet">提交后马上显示在下方，所有同事都能看到。需要修改或撤回，请联系平台维护人。技能材料可按 <a class="card-link" style="margin:0" href="downloads/skill-submission-template.zip">提交包模板</a> 整理后发给维护人。</p>
-    </form>
-    <div class="signups" aria-live="polite">
-      <h3 class="title-2" id="signup-count">已报名下期分享</h3>
-      <div class="signup-list" id="signup-list"></div>
+      <ul class="body-3">
+        <li><svg width="20" height="20" viewBox="0 0 256 256" aria-hidden="true"><path d="M229.7 77.7l-128 128a8 8 0 0 1-11.4 0l-56-56a8 8 0 0 1 11.4-11.4L96 188.7 218.3 66.3a8 8 0 0 1 11.4 11.4z" fill="currentColor"/></svg><span><b class="body-2">文件不出你的电脑</b>：在浏览器本地处理，不上传服务器</span></li>
+        <li><svg width="20" height="20" viewBox="0 0 256 256" aria-hidden="true"><path d="M229.7 77.7l-128 128a8 8 0 0 1-11.4 0l-56-56a8 8 0 0 1 11.4-11.4L96 188.7 218.3 66.3a8 8 0 0 1 11.4 11.4z" fill="currentColor"/></svg><span><b class="body-2">参照样板排版</b>：上传所里的模板，照着它的格式排</span></li>
+        <li><svg width="20" height="20" viewBox="0 0 256 256" aria-hidden="true"><path d="M229.7 77.7l-128 128a8 8 0 0 1-11.4 0l-56-56a8 8 0 0 1 11.4-11.4L96 188.7 218.3 66.3a8 8 0 0 1 11.4 11.4z" fill="currentColor"/></svg><span><b class="body-2">修订模式输出</b>：每处改动都能在 Word 里看到</span></li>
+      </ul>
     </div>
   </div>
 </section>
 
-<!-- 外部精选 -->
+<!-- 开源技能 -->
 <section id="external">
   <div class="wrap">
     <div class="sec-head rise">
-      <h2 class="heading-4">外部精选</h2>
+      <h2 class="heading-4">开源技能</h2>
       <p class="body-3 muted">来自开源项目 <a class="card-link" style="margin:0" href="https://github.com/Decikingship/legal-agent-skills">legal-agent-skills</a>，作者 John He，MIT 协议，内容未改动。这些技能不连接检索服务，Claude、WorkBuddy 等都能直接装；文中的法条、案例请自行核对。</p>
     </div>
     <div class="xcards">
@@ -243,14 +277,14 @@
   </div>
 </section>
 
-<!-- How it works -->
-<section id="how">
-  <div class="wrap">
-    <div class="sec-head rise">
-      <h2 class="heading-4">例会怎么参加</h2>
-      <p class="body-3 muted">想分享就报名，想用就来看，形式随意。</p>
-    </div>
-    <div class="steps">
+<!-- 报名提交 -->
+<section id="join" class="final">
+  <div class="wrap rise">
+    <p class="caption-3 eyebrow-plain">报名提交</p>
+    <h2 class="heading-3">下期分享，等你来</h2>
+    <p class="body-3 muted">一个提示词、一套流程、一个小工具都算。填下面这张表就行，一分钟搞定。</p>
+    <div class="join-steps">
+      <div class="steps">
       <div class="step rise">
         <p class="n title-4">01</p>
         <h3 class="title-2">提交技能，就算报名</h3>
@@ -267,24 +301,26 @@
         <p class="body-6 muted">技能、录屏和课件都挂到这个网站上，没来的也能看。</p>
       </div>
     </div>
-  </div>
-</section>
-
-<!-- Online tool -->
-<section aria-labelledby="tool-title">
-  <div class="wrap">
-    <div class="tool rise">
-      <div>
-        <span class="tag caption-3">已上线</span>
-        <h2 id="tool-title" class="heading-4" style="margin-top:16px">在线排版：打开网页就能用</h2>
-        <p class="body-3 muted" style="margin-top:16px">不用装 Python，不用敲命令。拖入 Word 文档，选格式，下载排好的新文件。</p>
-        <a class="btn lg button-md" style="margin-top:24px" href="tools/paiban/index.html">打开在线排版</a>
+    <form class="signup" id="signup-form" novalidate>
+      <div class="row2">
+        <label><span class="title-4">姓名 *</span><input name="name" maxlength="20" required autocomplete="name"></label>
+        <label><span class="title-4">适用工具</span>
+          <select name="tools"><option>通用 Agent</option><option>Claude</option><option>WorkBuddy</option><option>网页版</option><option>其他</option></select>
+        </label>
       </div>
-      <ul class="body-3">
-        <li><svg width="20" height="20" viewBox="0 0 256 256" aria-hidden="true"><path d="M229.7 77.7l-128 128a8 8 0 0 1-11.4 0l-56-56a8 8 0 0 1 11.4-11.4L96 188.7 218.3 66.3a8 8 0 0 1 11.4 11.4z" fill="currentColor"/></svg><span><b class="body-2">文件不出你的电脑</b>：在浏览器本地处理，不上传服务器</span></li>
-        <li><svg width="20" height="20" viewBox="0 0 256 256" aria-hidden="true"><path d="M229.7 77.7l-128 128a8 8 0 0 1-11.4 0l-56-56a8 8 0 0 1 11.4-11.4L96 188.7 218.3 66.3a8 8 0 0 1 11.4 11.4z" fill="currentColor"/></svg><span><b class="body-2">参照样板排版</b>：上传所里的模板，照着它的格式排</span></li>
-        <li><svg width="20" height="20" viewBox="0 0 256 256" aria-hidden="true"><path d="M229.7 77.7l-128 128a8 8 0 0 1-11.4 0l-56-56a8 8 0 0 1 11.4-11.4L96 188.7 218.3 66.3a8 8 0 0 1 11.4 11.4z" fill="currentColor"/></svg><span><b class="body-2">修订模式输出</b>：每处改动都能在 Word 里看到</span></li>
-      </ul>
+      <label><span class="title-4">要分享的技能 *</span><input name="skill" maxlength="60" required placeholder="例如：合同审查要点清单"></label>
+      <label><span class="title-4">一句话介绍</span><textarea name="intro" maxlength="200" placeholder="解决什么问题、大概能省多少时间"></textarea></label>
+      <label><span class="title-4">相关链接（可选）</span><input name="link" maxlength="300" placeholder="网盘、文档或演示视频地址"></label>
+      <input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <div class="actions">
+        <button type="submit" class="btn lg button-md" id="signup-btn">提交报名</button>
+        <span class="body-6" id="signup-msg" role="status"></span>
+      </div>
+      <p class="caption-5 quiet">提交后马上显示在下方，所有同事都能看到。需要修改或撤回，请联系平台维护人。技能材料可按 <a class="card-link" style="margin:0" href="downloads/skill-submission-template.zip">提交包模板</a> 整理后发给维护人。</p>
+    </form>
+    <div class="signups" aria-live="polite">
+      <h3 class="title-2" id="signup-count">已报名下期分享</h3>
+      <div class="signup-list" id="signup-list"></div>
     </div>
   </div>
 </section>
@@ -319,9 +355,9 @@
   </div>
 </footer>
 
-<script src="js/site.js?v=202611111725"></script>
-<script src="js/config.js?v=202611111725"></script>
-<script src="js/signup.js?v=202611111725"></script>
-<script src="js/recommend.js?v=202611111725"></script>
+<script src="js/site.js?v=202611111813"></script>
+<script src="js/config.js?v=202611111813"></script>
+<script src="js/signup.js?v=202611111813"></script>
+<script src="js/recommend.js?v=202611111813"></script>
 </body>
 </html>
