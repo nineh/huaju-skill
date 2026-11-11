@@ -241,3 +241,9 @@ footer p+p{margin-top:var(--s75)}
 .eyebrow-plain{color:var(--accent);margin-bottom:var(--s100)}
 @media (max-width:900px){.flow{grid-template-columns:1fr}.flow-arrow{transform:rotate(90deg);justify-self:center}.principles{grid-template-columns:1fr}}
 .final .eyebrow-plain{margin:0 auto var(--s100);display:block}
+
+/* 首页右上角访问量 */
+.stats-pill{position:fixed;top:var(--s300);right:var(--s300);z-index:49;display:inline-flex;align-items:center;gap:var(--s75);padding:var(--s50) var(--s100);border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.8);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:var(--ink-2)}
+.stats-pill .live{width:8px;height:8px;border-radius:999px;background:#2E7D32}
+@media (max-width:1280px){.stats-pill{position:absolute;top:88px}}
+@media (max-width:640px){.stats-pill{top:80px;right:var(--s200)}}

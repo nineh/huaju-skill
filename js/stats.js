@@ -17,9 +17,16 @@
     .then(function () { return fetch(base + 'rpc/site_stats', { method: 'POST', headers: h, body: '{}' }); })
     .then(function (r) { return r && r.ok ? r.json() : null; })
     .then(function (s) {
+      if (!s) return;
       var el = document.getElementById('site-stats');
-      if (!el || !s) return;
-      el.textContent = '累计访问 ' + s.pv + ' 次 · ' + s.uv + ' 位访客 · 今日 ' + s.today + ' 次';
+      if (el) el.textContent = '累计访问 ' + s.pv + ' 次 · ' + s.uv + ' 位访客 · 今日 ' + s.today + ' 次';
+      var top = document.getElementById('site-stats-top');
+      if (top) {
+        top.innerHTML = '';
+        var dot = document.createElement('span'); dot.className = 'live'; top.appendChild(dot);
+        top.appendChild(document.createTextNode('累计访问 ' + s.pv + ' · 今日 ' + s.today));
+        top.hidden = false;
+      }
     })
     .catch(function () {});
 })();
