@@ -224,3 +224,7 @@ footer p+p{margin-top:var(--s75)}
 .rec-count{margin-top:var(--s300)}
 .rtags{display:flex;gap:var(--s50);flex-wrap:wrap}
 .tag.warn{border-color:#C77700;color:#8A5300}
+.rec-wrap{max-width:760px;margin-left:auto;margin-right:auto;justify-items:center;text-align:center}
+.rec-wrap > p{margin:0 auto}
+.rec-wrap .signup.rec{width:100%;margin:0 auto;text-align:left}
+.rec-wrap #rec-list{width:100%;text-align:left}
