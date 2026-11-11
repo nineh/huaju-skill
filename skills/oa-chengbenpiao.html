@@ -4,13 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>华炬 OA 成本票技能 · 华炬 Skill 集市</title>
-<meta name="description" content="让 WorkBuddy 把报销发票批量录入华炬 OA 我的票池，自动识别、校验、对账。">
+<meta name="description" content="让 AI 助手把报销发票批量录入华炬 OA 我的票池，自动识别、校验、对账。">
 <meta property="og:title" content="华炬 OA 成本票技能 · 华炬 Skill 集市">
-<meta property="og:description" content="让 WorkBuddy 把报销发票批量录入华炬 OA 我的票池，自动识别、校验、对账。">
+<meta property="og:description" content="让 AI 助手把报销发票批量录入华炬 OA 我的票池，自动识别、校验、对账。">
 <link rel="icon" type="image/png" href="../img/mark.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Noto+Sans+SC:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../css/site.css?v=202611111813">
+<link rel="stylesheet" href="../css/site.css?v=202611111826">
 </head>
 <body>
 <a class="skip button-sm" href="#main">跳到正文</a>
@@ -28,13 +28,13 @@
 <div class="wrap detail-hero">
   <a class="crumb title-4" href="../index.html#skills"><svg width="16" height="16" viewBox="0 0 256 256" aria-hidden="true"><path d="M224 128a8 8 0 0 1-8 8H59.3l58.4 58.3a8 8 0 0 1-11.4 11.4l-72-72a8 8 0 0 1 0-11.4l72-72a8 8 0 0 1 11.4 11.4L59.3 120H216a8 8 0 0 1 8 8z" fill="currentColor"/></svg>返回所内技能</a>
   <h1 class="heading-3">发票一张张录 OA？<br>交给 AI，30 张约 10 分钟</h1>
-  <p class="lead body-3 muted">华炬 OA 没有批量导入发票的功能，报销前要逐张录入「我的票池」，手工每张约 1 到 2 分钟。这个技能让 WorkBuddy 自动走完整个流程。</p>
+  <p class="lead body-3 muted">华炬 OA 没有批量导入发票的功能，报销前要逐张录入「我的票池」，手工每张约 1 到 2 分钟。这个技能让你的 AI 助手自动走完整个流程。</p>
   <div class="author big"><span class="avatar" aria-hidden="true">吴</span><span class="author-text"><span class="title-3">吴玉寒</span><span class="caption-5 quiet">作者</span></span></div>
-  <div class="facts"><div class="fact"><p class="caption-5 quiet">适用工具</p><p class="title-3">WorkBuddy</p></div><div class="fact"><p class="caption-5 quiet">系统</p><p class="title-3">Windows / macOS</p></div><div class="fact"><p class="caption-5 quiet">可见范围</p><p class="title-3">所内</p></div></div>
+  <div class="facts"><div class="fact"><p class="caption-5 quiet">适用工具</p><p class="title-3">通用 Agent</p></div><div class="fact"><p class="caption-5 quiet">系统</p><p class="title-3">Windows / macOS</p></div><div class="fact"><p class="caption-5 quiet">可见范围</p><p class="title-3">所内</p></div></div>
 </div>
 <div class="wrap doc">
-  <article><section><h2 class="heading-6">它做了什么</h2><p class="body-3">解析发票文件名，逐张上传识别并校验，确认入库，最后出一张对账表。</p><p class="body-3">实测 30 张发票约 10 分钟，38 张全额勾稽一致。</p></section><section><h2 class="heading-6">安装（5 步，约 10 分钟）</h2><ol class="body-3"><li><b>装 WorkBuddy</b>：已装的跳过。登录后随便发起一次对话，让它初始化。</li><li><b>装 bsk 命令行工具</b>：工具包里有 Windows 和 macOS 的离线安装包，按说明放到指定目录。</li><li><b>装技能</b>：把工具包 skills 文件夹下的 4 个文件夹整个复制到 WorkBuddy 的技能目录。</li><li><b>授权浏览器扩展</b>：在扩展管理页打开 BrowserSkill 的「允许访问文件网址」。漏了这步，上传会报错。</li><li><b>环境自检</b>：运行工具包里的 check_env.py，全部打勾即可使用。</li></ol></section><section><h2 class="heading-6">怎么用</h2><p class="body-3">对 WorkBuddy 说一句话就行，比如：</p><code class="code">把 D:\报销\9月发票 里的发票批量录入 OA 票池</code><p class="body-3">说「成本票」「录票」「录发票」「票池」也能触发。单张 5000 元及以上的发票，助理会在开跑前一次性向你要付款凭证。</p><p class="body-3">发票文件名要保持报销邮箱下载时的原样，格式是：</p><code class="code">开票日期_销售方_金额元_发票号（20 位）.pdf</code></section><section><h2 class="heading-6">必须知道的规则</h2><ul class="body-3"><li>OA 的「发票金额」是价税合计。文件名里的金额口径不统一，脚本会自动判别，不用手算。</li><li>单张 5000 元及以上必须上传付款凭证，OA 硬性校验，绕不过去。</li><li>重复发票有防重提示，脚本会自动跳过。</li><li>新录入的发票状态是「待确认」，管理员审核后变为「可用」。</li><li>对账表里标「待处理」的少数几张，手工补录或找吴玉寒律师协助。</li></ul></section></article>
-  <aside class="side" aria-label="获取方式"><p class="title-3">获取工具包</p><p class="body-6 muted">本技能涉及所内 OA 系统，不对外公开。工具包约 18 MB，内含安装说明（Windows 与 macOS 各一份）。</p><span class="btn button-md" aria-disabled="true">向吴玉寒律师领取</span><p class="caption-5 quiet">所内网盘下载地址待补充</p><hr style="border:none;border-top:1px solid var(--line)"><p class="caption-4 quiet">版本 v1.1 · 2026 年 10 月</p></aside>
+  <article><section><h2 class="heading-6">它做了什么</h2><p class="body-3">解析发票文件名，逐张上传识别并校验，确认入库，最后出一张对账表。</p><p class="body-3">实测 30 张发票约 10 分钟，38 张全额勾稽一致。</p></section><section><h2 class="heading-6">安装（5 步，约 10 分钟）</h2><ol class="body-3"><li><b>准备 AI 助手</b>：装好你常用的 AI 助手（Agent），登录后随便发起一次对话。工具包里的路径按吴玉寒律师的环境写成，换别的助手时按说明对应调整。</li><li><b>装 bsk 命令行工具</b>：工具包里有 Windows 和 macOS 的离线安装包，按说明放到指定目录。</li><li><b>装技能</b>：把工具包 skills 文件夹下的 4 个文件夹整个复制到你的 AI 助手的技能目录。</li><li><b>授权浏览器扩展</b>：在扩展管理页打开 BrowserSkill 的「允许访问文件网址」。漏了这步，上传会报错。</li><li><b>环境自检</b>：运行工具包里的 check_env.py，全部打勾即可使用。</li></ol></section><section><h2 class="heading-6">怎么用</h2><p class="body-3">对你的 AI 助手说一句话就行，比如：</p><code class="code">把 D:\报销\9月发票 里的发票批量录入 OA 票池</code><p class="body-3">说「成本票」「录票」「录发票」「票池」也能触发。单张 5000 元及以上的发票，助理会在开跑前一次性向你要付款凭证。</p><p class="body-3">发票文件名要保持报销邮箱下载时的原样，格式是：</p><code class="code">开票日期_销售方_金额元_发票号（20 位）.pdf</code></section><section><h2 class="heading-6">必须知道的规则</h2><ul class="body-3"><li>OA 的「发票金额」是价税合计。文件名里的金额口径不统一，脚本会自动判别，不用手算。</li><li>单张 5000 元及以上必须上传付款凭证，OA 硬性校验，绕不过去。</li><li>重复发票有防重提示，脚本会自动跳过。</li><li>新录入的发票状态是「待确认」，管理员审核后变为「可用」。</li><li>对账表里标「待处理」的少数几张，手工补录或找吴玉寒律师协助。</li></ul></section></article>
+  <aside class="side" aria-label="获取方式"><p class="title-3">获取工具包</p><p class="body-6 muted">本技能涉及所内 OA 系统，不对外公开。工具包约 18 MB，内含安装说明（Windows 与 macOS 各一份）。</p><span class="btn button-md" aria-disabled="true">向吴玉寒律师领取</span><hr style="border:none;border-top:1px solid var(--line)"><p class="caption-4 quiet">版本 v1.1 · 2026 年 10 月</p></aside>
 </div>
 </main>
 <footer>
