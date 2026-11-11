@@ -211,3 +211,7 @@ footer p+p{margin-top:var(--s75)}
 .xcard .tag{align-self:flex-start}
 .xcard .author{margin-top:auto;padding-top:var(--s100)}
 .xcard .card-link{margin-top:0}
+
+.nav-links a.nav-hot{color:var(--accent);font-weight:600;display:inline-flex;align-items:center;gap:var(--s50)}
+.nav-links a.nav-hot:hover{color:var(--accent-dark)}
+.nav-badge{font-size:12px;line-height:16px;font-weight:600;color:#fff;background:var(--accent);border-radius:999px;padding:0 var(--s50)}
