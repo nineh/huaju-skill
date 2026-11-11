@@ -215,3 +215,12 @@ footer p+p{margin-top:var(--s75)}
 .nav-links a.nav-hot{color:var(--accent);font-weight:600;display:inline-flex;align-items:center;gap:var(--s50)}
 .nav-links a.nav-hot:hover{color:var(--accent-dark)}
 .nav-badge{font-size:12px;line-height:16px;font-weight:600;color:#fff;background:var(--accent);border-radius:999px;padding:0 var(--s50)}
+
+.rec-wrap{margin-top:var(--s700);display:grid;gap:var(--s200)}
+.rec-wrap > p{max-width:680px}
+.signup.rec{margin:0;max-width:760px}
+.signup .check{display:flex;align-items:center;gap:var(--s75)}
+.signup .check input{width:auto}
+.rec-count{margin-top:var(--s300)}
+.rtags{display:flex;gap:var(--s50);flex-wrap:wrap}
+.tag.warn{border-color:#C77700;color:#8A5300}

@@ -216,6 +216,30 @@
         <a class="card-link button-sm" href="downloads/external/util-case-file-index.zip">下载技能包</a>
       </article>
     </div>
+
+    <div class="rec-wrap rise">
+      <h3 class="title-2">推荐一个外部技能</h3>
+      <p class="body-6 muted">在网上发现好用的技能，填下面的表推荐给大家。这里只放原项目链接，不转存文件；原作者和推荐人都会署名。</p>
+      <form class="signup rec" id="rec-form" novalidate>
+        <div class="row2">
+          <label><span class="title-4">你的姓名 *</span><input name="recommender" maxlength="20" required></label>
+          <label><span class="title-4">技能名称 *</span><input name="skill" maxlength="60" required placeholder="例如：合同审查"></label>
+        </div>
+        <label><span class="title-4">原项目地址 *</span><input name="link" maxlength="300" required placeholder="GitHub 或技能市场的链接"></label>
+        <div class="row2">
+          <label><span class="title-4">原作者</span><input name="author" maxlength="40" placeholder="不知道可以不填"></label>
+          <label><span class="title-4">开源协议</span>
+            <select name="license"><option>MIT</option><option>Apache-2.0</option><option>其他开源协议</option><option>未注明</option><option>不清楚</option></select>
+          </label>
+        </div>
+        <label><span class="title-4">推荐理由</span><textarea name="note" maxlength="200" placeholder="用它做什么、哪里好用"></textarea></label>
+        <label class="check body-6"><input type="checkbox" name="needs_account"> 需要注册账号或付费会员才能用</label>
+        <input class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <div class="actions"><button type="submit" class="btn button-md" id="rec-btn">提交推荐</button><span class="body-6" id="rec-msg" role="status"></span></div>
+      </form>
+      <h3 class="title-2 rec-count" id="rec-count">同事推荐</h3>
+      <div class="xcards" id="rec-list" aria-live="polite"></div>
+    </div>
   </div>
 </section>
 
@@ -298,5 +322,6 @@
 <script src="js/site.js"></script>
 <script src="js/config.js"></script>
 <script src="js/signup.js"></script>
+<script src="js/recommend.js"></script>
 </body>
 </html>
