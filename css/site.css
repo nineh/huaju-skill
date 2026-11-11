@@ -204,3 +204,10 @@ footer p+p{margin-top:var(--s75)}
 @media (prefers-reduced-motion:reduce){.skel{animation:none}}
 @media (max-width:640px){.signup .row2{grid-template-columns:1fr}}
 .final .signup p,.final .signups p{max-width:none;margin:0}
+
+/* 外部精选 */
+.xcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:var(--s200)}
+.xcard{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:var(--s300);display:flex;flex-direction:column;gap:var(--s100)}
+.xcard .tag{align-self:flex-start}
+.xcard .author{margin-top:auto;padding-top:var(--s100)}
+.xcard .card-link{margin-top:0}
