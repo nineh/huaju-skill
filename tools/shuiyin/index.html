@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>证件水印打码 · 华炬 Skill 集市</title>
+<meta name="description" content="给身份证、营业执照等证件照片加水印、遮挡打码。图片只在浏览器本地处理，不上传服务器。">
+<link rel="icon" type="image/png" href="../../img/mark.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Noto+Sans+SC:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../css/site.css?v=202611121319">
+<link rel="stylesheet" href="shuiyin.css?v=202611121319">
+</head>
+<body>
+<a class="skip button-sm" href="#main">跳到正文</a>
+<nav class="nav" aria-label="主导航">
+  <a class="brand title-3" href="../../index.html" aria-label="华炬 Skill 集市 首页"><img src="../../img/mark.png" width="28" height="28" alt="">华炬 Skill 集市</a>
+  <div class="nav-links title-4">
+    <a href="../../index.html#skills">所内技能</a>
+    <a class="nav-hot" href="../../index.html#external">开源技能<span class="nav-badge">新</span></a>
+    <a class="on" href="../../index.html#tools">在线工具</a>
+    <a href="../../index.html#guide">使用指南</a>
+  </div>
+  <a class="btn button-sm" href="../../index.html#join">报名分享</a>
+</nav>
+
+<main id="main" class="wrap tool-page">
+  <header class="tool-head">
+    <a class="crumb title-4" href="../../index.html#tools"><svg width="16" height="16" viewBox="0 0 256 256" aria-hidden="true"><path d="M224 128a8 8 0 0 1-8 8H59.3l58.4 58.3a8 8 0 0 1-11.4 11.4l-72-72a8 8 0 0 1 0-11.4l72-72a8 8 0 0 1 11.4 11.4L59.3 120H216a8 8 0 0 1 8 8z" fill="currentColor"/></svg>返回在线工具</a>
+    <h1 class="heading-3">证件照片，加水印再发出去</h1>
+    <p class="body-3 muted">给身份证、营业执照、授权委托书照片加上"仅供××使用"的水印，敏感号码可以拖框打码。图片只在你的浏览器里处理，不上传服务器。</p>
+    <div class="author big"><span class="avatar" aria-hidden="true">J</span><span class="author-text"><span class="title-3">joyqi</span><span class="caption-5 quiet">原作者 · GPL-3.0 协议 · 华炬版由韩宇改编</span></span></div>
+  </header>
+
+  <div class="sy-grid">
+    <div class="panel">
+      <h2 class="title-3"><span class="num title-4">01</span>选择图片</h2>
+      <label class="drop" id="drop" tabindex="0">
+        <input type="file" id="file" accept="image/png,image/jpeg,image/gif,image/webp" multiple hidden>
+        <span class="drop-icon" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 256 256"><path d="M216 40H40a16 16 0 0 0-16 16v144a16 16 0 0 0 16 16h176a16 16 0 0 0 16-16V56a16 16 0 0 0-16-16zm0 16v102.8l-26.3-26.3a16 16 0 0 0-22.6 0l-20 20-44-44a16 16 0 0 0-22.6 0L40 149.5V56zM40 172.1l52-52 80 80H40zm176 27.9h-21.4l-36-36 20-20L216 181.4V200zm-72-100a12 12 0 1 1 12 12 12 12 0 0 1-12-12z" fill="currentColor"/></svg></span>
+        <span class="drop-text"><span class="title-3">拖入图片，或点击选择</span><br><span class="caption-5 quiet">可一次选多张，比如身份证正反面</span></span>
+      </label>
+
+      <h2 class="title-3"><span class="num title-4">02</span>水印文字</h2>
+      <label class="field"><span class="title-4">常用模板</span>
+        <select id="preset">
+          <option value="仅供{用途}使用，他用无效">仅供××使用，他用无效</option>
+          <option value="仅供向{用途}提交，复印无效">仅供向××提交，复印无效</option>
+          <option value="仅供{用途}备案，再次复印无效">仅供××备案，再次复印无效</option>
+          <option value="">自己写</option>
+        </select>
+      </label>
+      <label class="field" id="purpose-field"><span class="title-4">用途 / 对象</span>
+        <input type="text" id="purpose" maxlength="24" placeholder="例如：某某法院立案 / 某某银行开户">
+      </label>
+      <label class="field"><span class="title-4">水印内容</span>
+        <input type="text" id="text" maxlength="40" placeholder="仅供办理××使用，他用无效">
+      </label>
+      <label class="row body-6"><input type="checkbox" id="with-date" checked> 末尾加上今天的日期</label>
+
+      <h2 class="title-3"><span class="num title-4">03</span>样式</h2>
+      <div class="row body-6">
+        <span class="title-4">颜色</span><input type="color" id="color" value="#9D0522" aria-label="水印颜色">
+        <button type="button" class="btn ghost button-sm swatch" data-c="#9D0522">华炬红</button>
+        <button type="button" class="btn ghost button-sm swatch" data-c="#1F4FD1">蓝</button>
+        <button type="button" class="btn ghost button-sm swatch" data-c="#555555">灰</button>
+      </div>
+      <label class="range body-6"><span>透明度</span><input type="range" id="alpha" min="0.05" max="0.8" step="0.05" value="0.25"><output id="alpha-v"></output></label>
+      <label class="range body-6"><span>角度</span><input type="range" id="angle" min="-90" max="90" step="3" value="-30"><output id="angle-v"></output></label>
+      <label class="range body-6"><span>间隔</span><input type="range" id="space" min="1.5" max="8" step="0.25" value="3.5"><output id="space-v"></output></label>
+      <label class="range body-6"><span>字号</span><input type="range" id="size" min="0.5" max="3" step="0.05" value="1"><output id="size-v"></output></label>
+    </div>
+
+    <div class="stage">
+      <div class="stage-empty body-6" id="empty">先在左边选一张图片</div>
+      <div class="thumbs" id="thumbs" hidden></div>
+      <div class="tools" id="tools" hidden>
+        <button type="button" class="btn ghost button-sm" id="mask-mode" aria-pressed="false">拖框打码</button>
+        <button type="button" class="btn ghost button-sm" id="undo" disabled>撤销打码</button>
+        <button type="button" class="btn ghost button-sm" id="remove">移除这张</button>
+        <span class="note" id="mask-tip" hidden>在图片上按住拖动，框住要遮挡的号码或照片</span>
+      </div>
+      <div class="canvas-wrap" id="wrap" hidden><canvas id="canvas"></canvas></div>
+      <div class="tools" id="dl" hidden>
+        <label class="row body-6">格式 <select id="fmt"><option value="jpg">JPG（体积小）</option><option value="png">PNG（无损）</option></select></label>
+        <button type="button" class="btn button-md" id="save-one">下载这张</button>
+        <button type="button" class="btn ghost button-md" id="save-all">全部下载</button>
+        <span class="body-6" id="msg" role="status"></span>
+      </div>
+    </div>
+  </div>
+
+  <p class="privacy caption-5 quiet">图片只在你的浏览器里处理，不会上传。导出的图片不带原照片的拍摄信息。<br>本工具改编自 <a class="card-link" style="margin:0" href="https://github.com/joyqi/sfz">joyqi/sfz</a>，以 GPL-3.0 协议开源，源代码见本目录 <a class="card-link" style="margin:0" href="NOTICE.md">修改说明</a> 与 <a class="card-link" style="margin:0" href="LICENSE">协议全文</a>。</p>
+</main>
+
+<script src="../../js/config.js?v=202611121319"></script>
+<script src="../../js/stats.js?v=202611121319"></script>
+<script src="shuiyin.js?v=202611121319"></script>
+</body>
+</html>
