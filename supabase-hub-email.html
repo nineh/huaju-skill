@@ -1,0 +1,9 @@
+<!-- 技能库登录邮件模板：Supabase → Authentication → Emails，把 Magic Link 和 Confirm signup 两个模板都换成下面这段 -->
+<div style="font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;max-width:480px;margin:0 auto;padding:24px;color:#1F1A1A">
+  <p style="font-size:14px;color:#9D0522;font-weight:600;margin:0 0 16px">华炬 Skill 集市 · 技能库</p>
+  <p style="font-size:16px;margin:0 0 8px">你的登录验证码是：</p>
+  <p style="font-size:32px;letter-spacing:6px;font-weight:700;margin:0 0 16px">{{ .Token }}</p>
+  <p style="font-size:14px;color:#6B6363;margin:0 0 16px">把验证码填回网页即可登录，有效期约 1 小时。也可以直接点下面的链接登录：</p>
+  <p style="margin:0 0 24px"><a href="{{ .ConfirmationURL }}" style="display:inline-block;background:#9D0522;color:#fff;text-decoration:none;padding:10px 20px;border-radius:8px;font-size:14px">一键登录</a></p>
+  <p style="font-size:12px;color:#9A9191;margin:0">如果不是你本人操作，忽略这封邮件即可。</p>
+</div>

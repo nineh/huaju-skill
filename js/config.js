@@ -2,5 +2,6 @@
  * anon key 是公开密钥，可以放在网页里；数据权限由数据库的 RLS 规则控制。 */
 window.HUAJU_CONFIG = {
   SUPABASE_URL: 'https://kkfehhmnafmyecskkbgf.supabase.co',       // 例如 https://xxxx.supabase.co
-  SUPABASE_ANON_KEY: 'sb_publishable_zlnpfn2YztoFayrtn6cv1A_bzalxLnH'   // Settings → API Keys → Publishable key（sb_publishable_ 开头）
+  SUPABASE_ANON_KEY: 'sb_publishable_zlnpfn2YztoFayrtn6cv1A_bzalxLnH',  // Settings → API Keys → Publishable key（sb_publishable_ 开头）
+  HUB_EMAIL_DOMAIN: 'huajulaw.com'  // 技能库只允许这个后缀的邮箱登录；要和 supabase-hub.sql 里 hub_settings 的 email_domain 一致
 };
