@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>技能详情 · 华炬 Skill 集市</title>
+<meta name="description" content="技能详情：在线阅读 SKILL.md、查看文件与版本、下载技能包。">
+<link rel="icon" type="image/png" href="../img/mark.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Noto+Sans+SC:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/site.css?v=202611201600">
+<link rel="stylesheet" href="../css/hub.css?v=202611201600">
+</head>
+<body class="hub">
+<a class="skip button-sm" href="#main">跳到正文</a>
+<nav class="nav" aria-label="主导航">
+  <a class="brand title-3" href="../index.html" aria-label="华炬 Skill 集市 首页"><img src="../img/mark.png" width="28" height="28" alt="">华炬 Skill 集市</a>
+  <div class="nav-links title-4">
+    <a href="index.html" data-nav="catalog" class="on" aria-current="page">技能库</a>
+    <a href="publish.html" data-nav="publish">发布技能</a>
+    <a href="me.html" data-nav="me">我的</a>
+    <a href="admin.html" data-nav="admin" hidden>审核管理</a>
+  </div>
+  <div class="hub-auth" id="hub-auth"></div>
+</nav>
+<main id="main" class="hub-main">
+<div class="wrap">
+<a class="crumb title-4" href="index.html">返回技能库</a>
+<div id="skill" aria-live="polite"><div class="skel" style="margin-top:24px"></div></div>
+</div>
+</main>
+<footer>
+  <div class="wrap row">
+    <div>
+      <img src="../img/logo.png" width="216" height="41" alt="山西华炬律师事务所">
+      <p class="caption-5 quiet" style="margin-top:8px">Skill 集市 · 技能库</p>
+    </div>
+    <div style="max-width:520px">
+      <p class="caption-5 quiet">免责说明：技能输出仅为辅助，文书内容须由律师自行复核。技能库只保存技能包，不收集任何客户文件。</p>
+      <p class="caption-5 quiet">技能库的发布、审核、版本与评分流程借鉴开源项目 iflytek/skillhub（Apache-2.0）。</p>
+    </div>
+  </div>
+</footer>
+<script src="../js/config.js?v=202611201600"></script>
+<script src="../js/vendor/supabase.min.js?v=202611201600"></script>
+<script src="../js/vendor/marked.min.js?v=202611201600"></script>
+<script src="../js/vendor/purify.min.js?v=202611201600"></script>
+<script src="../js/hub.js?v=202611201600"></script>
+<script src="../js/hub-skill.js?v=202611201600"></script>
+</body>
+</html>

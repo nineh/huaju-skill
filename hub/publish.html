@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>发布技能 · 华炬 Skill 集市</title>
+<meta name="description" content="把你的技能包发布到华炬技能库，审核通过后上架。">
+<link rel="icon" type="image/png" href="../img/mark.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Noto+Sans+SC:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/site.css?v=202611201600">
+<link rel="stylesheet" href="../css/hub.css?v=202611201600">
+</head>
+<body class="hub">
+<a class="skip button-sm" href="#main">跳到正文</a>
+<nav class="nav" aria-label="主导航">
+  <a class="brand title-3" href="../index.html" aria-label="华炬 Skill 集市 首页"><img src="../img/mark.png" width="28" height="28" alt="">华炬 Skill 集市</a>
+  <div class="nav-links title-4">
+    <a href="index.html" data-nav="catalog">技能库</a>
+    <a href="publish.html" data-nav="publish" class="on" aria-current="page">发布技能</a>
+    <a href="me.html" data-nav="me">我的</a>
+    <a href="admin.html" data-nav="admin" hidden>审核管理</a>
+  </div>
+  <div class="hub-auth" id="hub-auth"></div>
+</nav>
+<main id="main" class="hub-main">
+<div class="wrap">
+<div class="hub-head">
+  <div>
+    <h1 class="heading-3">发布技能</h1>
+    <p class="body-3 muted">上传技能包 zip，网页会自动检查格式和敏感信息。提交后由管理员审核，通过后上架。已有的技能也在这里发新版本。</p>
+  </div>
+  <a class="card-link title-4" href="../downloads/skill-submission-template.zip">不会打包？下载提交模板</a>
+</div>
+<div id="gate"></div>
+<div id="publish" hidden>
+  <label class="drop" id="drop">
+    <input type="file" id="file" accept=".zip,application/zip" hidden>
+    <p class="title-2">把技能包 zip 拖到这里，或点击选择</p>
+    <p class="body-6 muted" style="margin-top:8px">zip 里要有一份 SKILL.md（可以在最外层，也可以在唯一的一个文件夹里），不超过 20 MB。</p>
+  </label>
+  <div class="panel" id="check" hidden style="margin-top:24px">
+    <h2 class="heading-6">自动检查</h2>
+    <ul class="checks body-6" id="checks"></ul>
+  </div>
+  <form class="hub-form" id="form" hidden novalidate style="margin-top:24px">
+    <h2 class="heading-6">技能信息</h2>
+    <div class="row2">
+      <label class="hub-field"><span class="title-4">技能标识 *</span><input name="slug" maxlength="64" required class="mono"><span class="caption-5 hint" id="slug-hint">小写字母、数字和短横线，发布后不能改，例如 contract-review</span></label>
+      <label class="hub-field"><span class="title-4">版本号 *</span><input name="version" maxlength="20" required class="mono" placeholder="1.0.0"><span class="caption-5 hint" id="ver-hint">格式 主版本.次版本.修订号</span></label>
+    </div>
+    <div class="row2">
+      <label class="hub-field"><span class="title-4">显示名称 *</span><input name="display_name" maxlength="60" required placeholder="例如：合同审查要点"></label>
+      <label class="hub-field"><span class="title-4">作者 *</span><input name="author" maxlength="40" required placeholder="你的姓名"></label>
+    </div>
+    <label class="hub-field"><span class="title-4">一句话介绍</span><textarea name="summary" maxlength="200" placeholder="解决什么问题、大概能省多少时间"></textarea></label>
+    <div class="row2">
+      <label class="hub-field"><span class="title-4">分类</span><input name="category" maxlength="20" list="cat-list" placeholder="诉讼 / 非诉 / 工具 / 排版 / 办公"><datalist id="cat-list"><option value="诉讼"><option value="非诉"><option value="工具"><option value="排版"><option value="办公"></datalist></label>
+      <label class="hub-field"><span class="title-4">可见范围</span><select name="visibility"><option value="public">公开：所有人可看可下载</option><option value="internal">仅所内：登录后才能看内容和下载</option></select></label>
+    </div>
+    <div class="row2">
+      <label class="hub-field"><span class="title-4">协议</span><select name="license"><option value="">不注明</option><option>MIT</option><option>Apache-2.0</option><option>CC-BY-4.0</option><option>所内使用</option></select></label>
+      <label class="hub-field"><span class="title-4">本版改动</span><input name="changelog" maxlength="500" placeholder="首次发布可不填"></label>
+    </div>
+    <label class="check body-6" style="display:flex;gap:8px;align-items:flex-start"><input type="checkbox" name="confirm" style="width:auto;margin-top:3px"> 我确认技能包里的说明、示例和截图不含真实当事人、案号、金额等客户信息；转载他人作品已保留原作者和协议。</label>
+    <div class="signup-actions" style="display:flex;gap:16px;align-items:center;flex-wrap:wrap">
+      <button type="submit" class="btn button-md" id="submit">提交审核</button>
+      <span class="body-6" id="msg" role="status"></span>
+    </div>
+  </form>
+</div>
+</div>
+</main>
+<footer>
+  <div class="wrap row">
+    <div>
+      <img src="../img/logo.png" width="216" height="41" alt="山西华炬律师事务所">
+      <p class="caption-5 quiet" style="margin-top:8px">Skill 集市 · 技能库</p>
+    </div>
+    <div style="max-width:520px">
+      <p class="caption-5 quiet">免责说明：技能输出仅为辅助，文书内容须由律师自行复核。技能库只保存技能包，不收集任何客户文件。</p>
+      <p class="caption-5 quiet">技能库的发布、审核、版本与评分流程借鉴开源项目 iflytek/skillhub（Apache-2.0）。</p>
+    </div>
+  </div>
+</footer>
+<script src="../js/config.js?v=202611201600"></script>
+<script src="../js/vendor/supabase.min.js?v=202611201600"></script>
+<script src="../js/vendor/jszip.min.js?v=202611201600"></script>
+<script src="../js/hub.js?v=202611201600"></script>
+<script src="../js/hub-publish.js?v=202611201600"></script>
+</body>
+</html>
