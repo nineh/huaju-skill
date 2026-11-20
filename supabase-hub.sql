@@ -229,6 +229,9 @@ begin
     if sk.owner_id is distinct from auth.uid() and not public.hub_is_admin() then
       raise exception '技能标识 % 已被占用，只有它的作者能发布新版本', p_slug;
     end if;
+    if exists (select 1 from hub_versions where skill_id = sk.id and version = p_version) then
+      raise exception '版本号 % 已经用过（含被驳回或撤回的），请换一个更大的版本号', p_version;
+    end if;
     if exists (select 1 from hub_versions where skill_id = sk.id and status = 'pending') then
       raise exception '这个技能已有一个版本在等待审核，请等审核完成或先撤回';
     end if;
@@ -250,6 +253,7 @@ begin
   perform public.hub_log('submit', p_slug || '@' || p_version, jsonb_build_object('version_id', vid));
   return vid;
 end $$;
+revoke execute on function public.hub_submit(text, text, text, jsonb, text, integer, text, text, text, text, text, text, text) from public, anon;
 grant execute on function public.hub_submit(text, text, text, jsonb, text, integer, text, text, text, text, text, text, text) to authenticated;
 
 -- 作者撤回待审核的版本
@@ -257,6 +261,7 @@ create or replace function public.hub_withdraw(p_version_id bigint) returns void
 language plpgsql security definer set search_path = public as $$
 declare v hub_versions%rowtype; s text;
 begin
+  if auth.uid() is null then raise exception '请先登录'; end if;
   select * into v from hub_versions where id = p_version_id for update;
   if not found or (v.submitted_by is distinct from auth.uid() and not public.hub_is_admin()) then raise exception '找不到这个版本'; end if;
   if v.status <> 'pending' then raise exception '只能撤回待审核的版本'; end if;
@@ -264,6 +269,7 @@ begin
   select slug into s from hub_skills where id = v.skill_id;
   perform public.hub_log('withdraw', s || '@' || v.version, null);
 end $$;
+revoke execute on function public.hub_withdraw(bigint) from public, anon;
 grant execute on function public.hub_withdraw(bigint) to authenticated;
 
 -- 管理员审核：通过后上架并更新卡片信息；驳回需写理由
@@ -285,10 +291,10 @@ begin
     m := v.meta;
     update hub_skills set
       display_name = coalesce(m ->> 'display_name', display_name),
-      summary      = coalesce(m ->> 'summary', summary),
+      summary      = m ->> 'summary',
       category     = coalesce(m ->> 'category', category),
       author       = coalesce(m ->> 'author', author),
-      license      = coalesce(m ->> 'license', license),
+      license      = m ->> 'license',
       visibility   = coalesce(m ->> 'visibility', visibility),
       latest_version = case when latest_version is null or public.hub_semver(v.version) > public.hub_semver(latest_version)
                             then v.version else latest_version end,
@@ -299,6 +305,7 @@ begin
   perform public.hub_log(case when p_approve then 'approve' else 'reject' end, sk.slug || '@' || v.version,
                          jsonb_build_object('note', p_note));
 end $$;
+revoke execute on function public.hub_review(bigint, boolean, text) from public, anon;
 grant execute on function public.hub_review(bigint, boolean, text) to authenticated;
 
 -- 管理员下架 / 重新上架
@@ -315,6 +322,7 @@ begin
   if not found then raise exception '找不到技能 %', p_slug; end if;
   perform public.hub_log(case when p_status = 'hidden' then 'hide' else 'unhide' end, p_slug, null);
 end $$;
+revoke execute on function public.hub_set_status(text, text) from public, anon;
 grant execute on function public.hub_set_status(text, text) to authenticated;
 
 -- 下载计数（任何人都可以调用，只加一）
@@ -332,6 +340,11 @@ on conflict (id) do update set public = false, file_size_limit = excluded.file_s
 drop policy if exists "hub_pkg_upload" on storage.objects;
 create policy "hub_pkg_upload" on storage.objects for insert to authenticated
   with check (bucket_id = 'hub-packages' and public.hub_is_staff() and (storage.foldername(name))[1] = auth.uid()::text);
+
+drop policy if exists "hub_pkg_delete" on storage.objects;
+create policy "hub_pkg_delete" on storage.objects for delete to authenticated
+  using (bucket_id = 'hub-packages' and (storage.foldername(name))[1] = auth.uid()::text
+         and not exists (select 1 from public.hub_versions v where v.storage_path = storage.objects.name));
 
 drop policy if exists "hub_pkg_read" on storage.objects;
 create policy "hub_pkg_read" on storage.objects for select to anon, authenticated
