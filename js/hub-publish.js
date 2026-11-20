@@ -52,6 +52,8 @@
       var md = entries.filter(function (e) { return /(^|\/)SKILL\.md$/.test(e.name) && e.name.split('/').length <= 2; });
       if (!md.length) throw new Error('没有找到 SKILL.md。它要放在 zip 最外层，或唯一的一个文件夹里。');
       var root = md[0].name.slice(0, md[0].name.length - 'SKILL.md'.length);
+      var stray = entries.filter(function (e) { return e.name.indexOf(root) !== 0; });
+      if (stray.length) throw new Error('技能文件夹外面还有其他文件（如 ' + stray[0].name + '），请只打包技能文件夹本身。');
       var files = entries.filter(function (e) { return e.name.indexOf(root) === 0; }).map(function (e) { return { path: e.name.slice(root.length), size: e._data && e._data.uncompressedSize || 0, entry: e }; });
       check('pass', '找到 SKILL.md，共 ' + files.length + ' 个文件');
       return md[0].async('string').then(function (text) {
@@ -112,10 +114,10 @@
       var mine = existing.owner_id === H.state.user.id || H.state.admin;
       if (!mine) { hint.textContent = '这个标识已被其他技能使用，请换一个'; hint.className = 'caption-5 err'; return; }
       hint.textContent = '将为「' + existing.display_name + '」发布新版本'; hint.className = 'caption-5 ok';
-      return H.sb.from('hub_versions').select('version').eq('skill_id', existing.id).in('status', ['published', 'pending']).then(function (v) {
+      return H.sb.from('hub_versions').select('version').eq('skill_id', existing.id).then(function (v) {
         var vs = (v.data || []).map(function (x) { return x.version; }).sort(function (a, b) { var x = a.split('.').map(Number), y = b.split('.').map(Number); return (x[0] - y[0]) || (x[1] - y[1]) || (x[2] - y[2]); });
         var last = vs[vs.length - 1];
-        if (last) { vh.textContent = '当前最新 v' + last + '，新版本号要更大'; form.version.value = bump(last); }
+        if (last) { vh.textContent = '已用过的最大版本 v' + last + '，新版本号要更大'; form.version.value = bump(last); }
         ['display_name', 'summary', 'category', 'author', 'license', 'visibility'].forEach(function (k) { if (existing[k] && (!form[k].value || k === 'visibility' || k === 'category')) form[k].value = existing[k]; });
       });
     });
@@ -125,20 +127,21 @@
   form.addEventListener('submit', function (ev) {
     ev.preventDefault();
     if (!pkg || btn.disabled) return;
+    var cur = pkg;
     var d = {}; ['slug', 'version', 'display_name', 'author', 'summary', 'category', 'visibility', 'license', 'changelog'].forEach(function (k) { d[k] = form[k].value.trim(); });
     if (!/^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/.test(d.slug)) { say('技能标识只能用小写字母、数字和短横线。', 'err'); form.slug.focus(); return; }
     if (!/^\d+\.\d+\.\d+$/.test(d.version)) { say('版本号格式应为 1.0.0。', 'err'); form.version.focus(); return; }
     if (!d.display_name) { say('请填写显示名称。', 'err'); form.display_name.focus(); return; }
     if (!d.author) { say('请填写作者。', 'err'); form.author.focus(); return; }
     if (!form.confirm.checked) { say('请勾选确认不含客户信息。', 'err'); return; }
-    if (pkg.hits && !confirm('自动检查发现 ' + pkg.hits + ' 处疑似敏感信息。确定都不是真实客户信息、继续提交吗？')) return;
+    if (cur.hits && !confirm('自动检查发现 ' + cur.hits + ' 处疑似敏感信息。确定都不是真实客户信息、继续提交吗？')) return;
     btn.disabled = true; say('正在上传技能包…');
     var path = H.state.user.id + '/' + d.slug + '/' + d.version + '-' + Date.now() + '.zip';
-    H.sb.storage.from('hub-packages').upload(path, pkg.file, { contentType: 'application/zip', upsert: false }).then(function (r) {
+    H.sb.storage.from('hub-packages').upload(path, cur.file, { contentType: 'application/zip', upsert: false }).then(function (r) {
       if (r.error) throw r.error;
       say('正在提交审核…');
       return H.sb.rpc('hub_submit', {
-        p_slug: d.slug, p_version: d.version, p_skill_md: pkg.text, p_files: pkg.files, p_storage_path: path, p_size: pkg.file.size,
+        p_slug: d.slug, p_version: d.version, p_skill_md: cur.text, p_files: cur.files, p_storage_path: path, p_size: cur.file.size,
         p_display_name: d.display_name, p_summary: d.summary, p_category: d.category, p_author: d.author,
         p_visibility: d.visibility, p_license: d.license || null, p_changelog: d.changelog
       });
@@ -151,7 +154,10 @@
       n.appendChild(el('p', 'body-6 muted', '管理员审核通过后会出现在技能库。审核进度可以在「我的」里查看。'));
       var a = el('a', 'card-link button-sm', '去「我的」看进度'); a.href = 'me.html'; n.appendChild(a);
       gate.appendChild(n); wrap.hidden = true;
-    }).catch(function (e) { say('提交失败：' + H.errText(e), 'err'); btn.disabled = false; });
+    }).catch(function (e) {
+      H.sb.storage.from('hub-packages').remove([path]).then(function () {}, function () {});
+      say('提交失败：' + H.errText(e), 'err'); btn.disabled = false;
+    });
   });
 
   drop.addEventListener('dragover', function (e) { e.preventDefault(); drop.classList.add('over'); });
